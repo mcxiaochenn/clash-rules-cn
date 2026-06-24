@@ -1,0 +1,256 @@
+# 上游数据源配置
+upstream:
+  # 中国大陆 IP 段
+  china_ip:
+    url: "https://raw.githubusercontent.com/17mon/china_ip_list/master/china_ip_list.txt"
+    parser: "cidr"
+
+  # 国内直连域名（dnsmasq 格式）
+  dnsmasq_china:
+    url: "https://raw.githubusercontent.com/felixonmars/dnsmasq-china-list/master/accelerated-domains.china.conf"
+    parser: "dnsmasq"
+
+  # v2fly domain-list-community 各分类域名（支持 include: 递归解析）
+  v2fly_cn:
+    url: "https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/cn"
+    parser: "v2fly-dlc"
+
+  v2fly_private:
+    url: "https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/private"
+    parser: "v2fly-dlc"
+
+  v2fly_google:
+    url: "https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/google"
+    parser: "v2fly-dlc"
+
+  v2fly_telegram:
+    url: "https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/telegram"
+    parser: "v2fly-dlc"
+
+  v2fly_apple:
+    url: "https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/apple"
+    parser: "v2fly-dlc"
+
+  v2fly_icloud:
+    url: "https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/icloud"
+    parser: "v2fly-dlc"
+
+  v2fly_microsoft:
+    url: "https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/microsoft"
+    parser: "v2fly-dlc"
+
+  v2fly_bilibili:
+    url: "https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/bilibili"
+    parser: "v2fly-dlc"
+
+  v2fly_baidu:
+    url: "https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/baidu"
+    parser: "v2fly-dlc"
+
+  v2fly_tencent:
+    url: "https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/tencent"
+    parser: "v2fly-dlc"
+
+  v2fly_alibaba:
+    url: "https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/alibaba"
+    parser: "v2fly-dlc"
+
+  v2fly_bytedance:
+    url: "https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/bytedance"
+    parser: "v2fly-dlc"
+
+  v2fly_steam:
+    url: "https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/steam"
+    parser: "v2fly-dlc"
+
+  # Loyalsoldier clash-rules（YAML 格式）
+  loyalsoldier_direct:
+    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/direct.txt"
+    parser: "loyalsoldier"
+
+  loyalsoldier_proxy:
+    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/proxy.txt"
+    parser: "loyalsoldier"
+
+  loyalsoldier_reject:
+    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/reject.txt"
+    parser: "loyalsoldier"
+
+  loyalsoldier_private:
+    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/private.txt"
+    parser: "loyalsoldier"
+
+  loyalsoldier_apple:
+    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/apple.txt"
+    parser: "loyalsoldier"
+
+  loyalsoldier_icloud:
+    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/icloud.txt"
+    parser: "loyalsoldier"
+
+  loyalsoldier_google:
+    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/google.txt"
+    parser: "loyalsoldier"
+
+  loyalsoldier_gfw:
+    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/gfw.txt"
+    parser: "loyalsoldier"
+
+  loyalsoldier_tld_not_cn:
+    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/tld-not-cn.txt"
+    parser: "loyalsoldier"
+
+  loyalsoldier_telegramcidr:
+    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/telegramcidr.txt"
+    parser: "loyalsoldier"
+
+  loyalsoldier_lancidr:
+    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/lancidr.txt"
+    parser: "loyalsoldier"
+
+  loyalsoldier_cncidr:
+    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/cncidr.txt"
+    parser: "loyalsoldier"
+
+  loyalsoldier_applications:
+    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/applications.txt"
+    parser: "loyalsoldier"
+
+  # GFWList
+  gfwlist:
+    url: "https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt"
+    parser: "gfwlist"
+
+  # blackmatrix7 ios_rule_script
+  ios_rule_direct:
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Direct/Direct.list"
+    parser: "classical"
+
+  ios_rule_proxy:
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Proxy/Proxy.list"
+    parser: "classical"
+
+  ios_rule_reject:
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Advertising/Advertising.list"
+    parser: "classical"
+
+  # anti-AD 广告域名
+  anti_ad:
+    url: "https://raw.githubusercontent.com/privacy-protection-tools/anti-AD/master/anti-ad-domains.txt"
+    parser: "domain-list"
+
+  # Telegram IP 段（静态数据）
+  telegram_ip:
+    parser: "static"
+    entries:
+      - "91.108.4.0/22"
+      - "91.108.8.0/22"
+      - "91.108.12.0/22"
+      - "91.108.16.0/22"
+      - "91.108.20.0/22"
+      - "91.108.56.0/22"
+      - "149.154.160.0/20"
+      - "185.76.151.0/24"
+      - "2001:b28:f23d::/48"
+      - "2001:b28:f23f::/48"
+      - "2001:67c:4e8::/48"
+
+  # 局域网/保留 IP（静态数据）
+  lan_reserved:
+    parser: "static"
+    entries:
+      - "10.0.0.0/8"
+      - "100.64.0.0/10"
+      - "127.0.0.0/8"
+      - "169.254.0.0/16"
+      - "172.16.0.0/12"
+      - "192.168.0.0/16"
+      - "224.0.0.0/4"
+      - "240.0.0.0/4"
+      - "::1/128"
+      - "fc00::/7"
+      - "fe80::/10"
+
+# 输出规则配置
+output:
+  # 域名类规则
+  direct_domain:
+    filename: "direct-domain.yaml"
+    description: "中国大陆直连域名"
+    behavior: "domain"
+    sources: ["dnsmasq_china", "v2fly_cn", "loyalsoldier_direct", "ios_rule_direct"]
+
+  proxy_domain:
+    filename: "proxy-domain.yaml"
+    description: "需要代理的域名"
+    behavior: "domain"
+    sources: ["v2fly_google", "v2fly_microsoft", "loyalsoldier_proxy", "loyalsoldier_google", "ios_rule_proxy"]
+
+  reject_domain:
+    filename: "reject-domain.yaml"
+    description: "广告及恶意域名"
+    behavior: "domain"
+    sources: ["anti_ad", "loyalsoldier_reject", "ios_rule_reject"]
+
+  private_domain:
+    filename: "private-domain.yaml"
+    description: "私有网络专用域名"
+    behavior: "domain"
+    sources: ["v2fly_private", "loyalsoldier_private"]
+
+  apple_direct:
+    filename: "apple-direct.yaml"
+    description: "Apple 在中国大陆可直连的域名"
+    behavior: "domain"
+    sources: ["v2fly_apple", "loyalsoldier_apple"]
+
+  icloud_domain:
+    filename: "icloud-domain.yaml"
+    description: "iCloud 域名列表"
+    behavior: "domain"
+    sources: ["v2fly_icloud", "loyalsoldier_icloud"]
+
+  gfwlist_domain:
+    filename: "gfwlist-domain.yaml"
+    description: "GFWList 域名列表"
+    behavior: "domain"
+    sources: ["gfwlist", "loyalsoldier_gfw"]
+
+  non_china_tld:
+    filename: "non-china-tld.yaml"
+    description: "非中国大陆使用的顶级域名"
+    behavior: "domain"
+    sources: ["loyalsoldier_tld_not_cn"]
+
+  common_software:
+    filename: "common-software.yaml"
+    description: "需要直连的常见软件列表"
+    behavior: "domain"
+    sources: ["v2fly_bilibili", "v2fly_baidu", "v2fly_tencent", "v2fly_alibaba", "v2fly_bytedance", "v2fly_steam", "loyalsoldier_applications"]
+
+  # IP 类规则
+  telegram_ip:
+    filename: "telegram-ip.yaml"
+    description: "Telegram 使用的 IP 地址"
+    behavior: "ipcidr"
+    sources: ["v2fly_telegram", "telegram_ip", "loyalsoldier_telegramcidr"]
+
+  lan_reserved_ip:
+    filename: "lan-reserved-ip.yaml"
+    description: "局域网 IP 及保留 IP 地址"
+    behavior: "ipcidr"
+    sources: ["lan_reserved", "loyalsoldier_lancidr"]
+
+  china_ip:
+    filename: "china-ip.yaml"
+    description: "中国大陆 IP 地址"
+    behavior: "ipcidr"
+    sources: ["china_ip", "loyalsoldier_cncidr"]
+
+# GeoIP 配置
+geoip:
+  files:
+    - url: "https://github.com/Loyalsoldier/geoip/releases/latest/download/Country.mmdb"
+      filename: "Country.mmdb"
+    - url: "https://github.com/Loyalsoldier/geoip/releases/latest/download/Country-asn.mmdb"
+      filename: "Country-asn.mmdb"
