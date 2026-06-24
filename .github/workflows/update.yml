@@ -19,6 +19,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -57,13 +59,17 @@ jobs:
       - name: Generate release notes
         id: notes
         run: |
-          # 获取上一个 tag
+          # 获取上一个 rules- 开头的 tag
           PREV_TAG=$(git tag -l "rules-*" --sort=-version:refname | head -n 2 | tail -n 1)
           if [ -z "$PREV_TAG" ]; then
-            echo "body=首次发布" >> $GITHUB_OUTPUT
+            # 首次发布，显示最近的 main 分支提交
+            NOTES=$(git log main --pretty=format:"- %s by @%an" -10)
+            echo "body<<EOF" >> $GITHUB_OUTPUT
+            echo "$NOTES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
           else
-            # 基于 main 分支生成变更日志
-            NOTES=$(git log main --pretty=format:"- %s by @%an" "${PREV_TAG//rules-/}..HEAD" 2>/dev/null || echo "- 规则更新")
+            # 基于 main 分支生成变更日志（从上次 release 到现在）
+            NOTES=$(git log main --pretty=format:"- %s by @%an" "${PREV_TAG}..HEAD" 2>/dev/null || echo "- 规则更新")
             echo "body<<EOF" >> $GITHUB_OUTPUT
             echo "$NOTES" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
