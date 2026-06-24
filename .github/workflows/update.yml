@@ -63,16 +63,22 @@ jobs:
           if [ -z "$PREV_TAG" ]; then
             # 首次发布，显示最近的 main 分支提交
             NOTES=$(git log main --pretty=format:"- %s by @%an" -10)
-            echo "body<<EOF" >> $GITHUB_OUTPUT
-            echo "$NOTES" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
           else
-            # 基于 main 分支生成变更日志（从上次 release 到现在）
-            NOTES=$(git log main --pretty=format:"- %s by @%an" "${PREV_TAG}..HEAD" 2>/dev/null || echo "- 规则更新")
-            echo "body<<EOF" >> $GITHUB_OUTPUT
-            echo "$NOTES" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
+            # 从 tag 中提取时间戳作为 --since 过滤
+            # tag 格式: rules-YYYYMMDDHHMMSSMMM
+            TAG_DATE=${PREV_TAG#rules-}
+            YEAR=${TAG_DATE:0:4}
+            MONTH=${TAG_DATE:4:2}
+            DAY=${TAG_DATE:6:2}
+            HOUR=${TAG_DATE:8:2}
+            MIN=${TAG_DATE:10:2}
+            SEC=${TAG_DATE:12:2}
+            SINCE_DATE="${YEAR}-${MONTH}-${DAY}T${HOUR}:${MIN}:${SEC}Z"
+            NOTES=$(git log main --pretty=format:"- %s by @%an" --since="$SINCE_DATE" 2>/dev/null || echo "- 规则更新")
           fi
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
