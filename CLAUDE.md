@@ -12,19 +12,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - 使用 **Conventional Commits** 格式：`feat: 新增 xxx`、`fix: 修复 xxx`、`docs: 更新 xxx`
 - 常用类型：`feat`（新功能）、`fix`（修复）、`docs`（文档）、`refactor`（重构）、`chore`（构建/工具变动）、`ci`（CI 配置）
+- 构建产物（`rules/`、`geoip/`）不提交到 main 分支，通过 CI 推送到 `rules` 分支
+- `.gitignore` 中 `/builder` 使用前缀 `/` 避免误匹配 `cmd/builder/` 目录
 
 ## Project Overview
 
-Clash proxy rule aggregation system. Fetches routing rules from multiple upstream sources, parses/merges/deduplicates them, and outputs YAML rule-provider files for Clash Premium and Clash.Meta/mihomo. A GitHub Actions CI workflow runs daily to build and release.
+Clash proxy rule aggregation system. Fetches routing rules from multiple upstream sources, parses/merges/deduplicates them, and outputs YAML rule-provider files for mihomo. A GitHub Actions CI workflow runs daily to build and release.
 
 ## Commands
 
 ```bash
-go build ./cmd/builder          # Build the binary
-go run ./cmd/builder             # Run directly
-go mod tidy                      # Generate go.sum after dependency changes
-go test ./...                    # Run all tests
-go test ./internal/parser/...    # Run tests for a single package
+go build -o builder.exe ./cmd/builder   # Build the binary (Windows)
+go build -o builder ./cmd/builder       # Build the binary (Linux/macOS)
+go run ./cmd/builder                     # Run directly
+go mod tidy                              # Generate go.sum after dependency changes
+go test ./...                            # Run all tests
+go test ./internal/parser/...            # Run tests for a single package
 ```
 
 The compiled binary is `builder` (or `builder.exe` on Windows), output to project root.
@@ -36,9 +39,9 @@ Data flows through a linear pipeline:
 ```
 sources.yaml config
     → Fetcher (concurrent HTTP, 3x retry)
-    → Parser (one of 7 format-specific parsers)
+    → Parser (one of 8 format-specific parsers)
     → Merger (aggregate by output rule, filter by behavior, deduplicate, sort)
-    → Writer (format as YAML rule-provider)
+    → Writer (format as YAML rule-provider, bufio streaming)
 ```
 
 **Entry point:** `cmd/builder/main.go` — orchestrates the pipeline.
@@ -51,22 +54,23 @@ sources.yaml config
 |---------|---------------|
 | `config` | Load and validate `sources.yaml` |
 | `fetcher` | Concurrent HTTP downloads with retry logic |
-| `parser` | 7 parsers: `cidr`, `dnsmasq`, `domain-list`, `gfwlist`, `v2fly-dlc`, `classical`, `static` |
+| `parser` | 8 parsers (see below) |
 | `merger` | Aggregate entries by output rule, filter by behavior (`domain`/`ipcidr`/`classical`), deduplicate, sort |
-| `writer` | Write YAML rule-provider files with correct formatting per behavior type |
+| `writer` | Write YAML rule-provider files with `bufio.Writer` streaming |
 | `types` | Shared `Entry` struct |
 
 ### Parser types and their output
 
-| Parser | Input format | Entry.Type produced |
-|--------|-------------|-------------------|
-| `cidr` | One CIDR per line | `IP-CIDR` / `IP-CIDR6` |
-| `dnsmasq` | `server=/domain/ip` | `DOMAIN-SUFFIX` |
-| `domain-list` | One domain per line | `DOMAIN-SUFFIX` |
-| `gfwlist` | Base64-encoded ABP rules | `DOMAIN-SUFFIX` |
-| `v2fly-dlc` | `domain:/full:/keyword:` format | `DOMAIN-SUFFIX` / `DOMAIN` / `DOMAIN-KEYWORD` |
-| `classical` | `TYPE,payload` format | preserved as-is |
-| `static` | Inline entries from config | auto-detected |
+| Parser | Input format | Entry.Type produced | Notes |
+|--------|-------------|-------------------|-------|
+| `cidr` | One CIDR per line | `IP-CIDR` / `IP-CIDR6` | |
+| `dnsmasq` | `server=/domain/ip` | `DOMAIN-SUFFIX` | |
+| `domain-list` | One domain per line | `DOMAIN-SUFFIX` | |
+| `gfwlist` | Base64-encoded ABP rules | `DOMAIN-SUFFIX` | |
+| `v2fly-dlc` | `domain:/full:/keyword:` + direct domains | `DOMAIN-SUFFIX` / `DOMAIN` / `DOMAIN-KEYWORD` | Supports `include:` recursive parsing with concurrent downloads and global cache |
+| `classical` | `TYPE,payload` format | preserved as-is | |
+| `loyalsoldier` | YAML `payload:` list | auto-detected: `DOMAIN-SUFFIX` / `IP-CIDR` / `IP-CIDR6` | Handles `+.domain` format |
+| `static` | Inline entries from config | auto-detected | |
 
 ### Writer formatting rules
 
@@ -83,12 +87,15 @@ sources.yaml config
 
 ## Output
 
-12 rule files in `rules/` (8 domain-type, 4 IP-CIDR-type) plus GeoIP MMDB/ASN files in `geoip/`. See `记录.md` for the full category list.
+12 rule files in `rules/` (9 domain-type, 3 IP-CIDR-type) plus GeoIP MMDB/ASN files in `geoip/`. Rules are published to the `rules` branch and accessible via CDN:
+- `https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/rules/{filename}`
+- `https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/rules/{filename}`
 
 ## Design Notes
 
-- `v2fly/domain-list-community` `include:` directives are not recursively resolved — only direct entries are parsed
+- `v2fly/domain-list-community` `include:` directives ARE recursively resolved (concurrent downloads, global cache across parsers)
+- `LoyalsoldierParser` auto-detects CIDR vs domain entries; handles `+.domain` format
 - DOMAIN-KEYWORD entries are dropped when writing `behavior: domain` output
 - GeoIP files use MMDB+ASN format only (no legacy .dat)
 - License: AGPL v3
-- Primary design document is `记录.md` (Chinese) — consult it for upstream source details and remaining work items
+- Primary design document is `记录.md` (Chinese) — consult it for upstream source details
