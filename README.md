@@ -1,5 +1,7 @@
 # Clash Rules CN
 
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/mcxiaochenn/clash-rules-cn/total?logo=github) ![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/mcxiaochenn/clash-rules-cn/latest/total?logo=github) [![jsdelivr stats](https://data.jsdelivr.com/v1/package/gh/mcxiaochenn/clash-rules-cn/badge?style=rounded)](https://www.jsdelivr.com/package/gh/mcxiaochenn/clash-rules-cn)
+
 Clash 分流规则聚合系统，自动从多个上游源获取规则，合并去重后发布为 YAML rule-provider 文件。使用 GitHub Actions 每日自动构建，保证规则最新。
 
 ## 说明
