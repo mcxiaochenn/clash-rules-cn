@@ -31,6 +31,10 @@ jobs:
       - name: Run builder
         run: ./builder
 
+      - name: Get date
+        id: date
+        run: echo "tag=$(date -u '+%Y%m%d')" >> $GITHUB_OUTPUT && echo "name=$(date -u '+%Y-%m-%d')" >> $GITHUB_OUTPUT
+
       - name: Push to rules branch
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
@@ -43,8 +47,8 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: "rules-$(date -u '+%Y%m%d')"
-          name: "Clash Rules $(date -u '+%Y-%m-%d')"
+          tag_name: "rules-${{ steps.date.outputs.tag }}"
+          name: "Clash Rules ${{ steps.date.outputs.name }}"
           files: |
             rules/*.yaml
             geoip/*.mmdb
