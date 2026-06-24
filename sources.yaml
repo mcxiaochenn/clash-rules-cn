@@ -134,6 +134,39 @@ upstream:
     url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Advertising/Advertising.list"
     parser: "classical"
 
+  # AI 相关域名
+  # dler-io/Rules
+  ai_dler:
+    url: "https://raw.githubusercontent.com/dler-io/Rules/main/Surge/Surge%203/Provider/AI%20Suite.list"
+    parser: "classical"
+
+  # SukkaW/Surge
+  ai_sukkaw:
+    url: "https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/ai.conf"
+    parser: "classical"
+
+  # ConnersHua/RuleGo
+  ai_connershua:
+    url: "https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/AI.list"
+    parser: "classical"
+
+  # blackmatrix7 AI 相关（不常更新，作为补充）
+  ai_openai:
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/OpenAI/OpenAI.list"
+    parser: "classical"
+
+  ai_gemini:
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Gemini/Gemini.list"
+    parser: "classical"
+
+  ai_claude:
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Claude/Claude.list"
+    parser: "classical"
+
+  ai_copilot:
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Copilot/Copilot.list"
+    parser: "classical"
+
   # anti-AD 广告域名
   anti_ad:
     url: "https://raw.githubusercontent.com/privacy-protection-tools/anti-AD/master/anti-ad-domains.txt"
@@ -227,6 +260,12 @@ output:
     description: "需要直连的常见软件列表"
     behavior: "domain"
     sources: ["v2fly_bilibili", "v2fly_baidu", "v2fly_tencent", "v2fly_alibaba", "v2fly_bytedance", "v2fly_steam", "loyalsoldier_applications"]
+
+  ai_domain:
+    filename: "ai-domain.yaml"
+    description: "AI 服务相关域名"
+    behavior: "domain"
+    sources: ["ai_dler", "ai_sukkaw", "ai_connershua", "ai_openai", "ai_gemini", "ai_claude", "ai_copilot"]
 
   # IP 类规则
   telegram_ip:
