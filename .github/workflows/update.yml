@@ -15,8 +15,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout main
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -29,18 +31,14 @@ jobs:
       - name: Run builder
         run: ./builder
 
-      - name: Commit and push
+      - name: Push to rules branch
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add rules/ geoip/
+          git checkout -B rules
+          git add -f rules/ geoip/
           git diff --staged --quiet || git commit -m "chore: 更新规则文件 [$(date -u '+%Y-%m-%d %H:%M UTC')]"
-
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: main
+          git push origin rules --force
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
