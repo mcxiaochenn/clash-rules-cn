@@ -42,7 +42,6 @@ jobs:
         id: date
         run: |
           echo "tag=$(date -u '+%Y%m%d%H%M%S%3N')" >> $GITHUB_OUTPUT
-          echo "name=$(date -u '+%Y-%m-%d')" >> $GITHUB_OUTPUT
 
       - name: Push to rules branch
         run: |
@@ -79,7 +78,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: rules-${{ steps.date.outputs.tag }}
-          name: Clash Rules ${{ steps.date.outputs.name }}
+          name: Clash Rules ${{ steps.date.outputs.tag }}
           body: ${{ steps.notes.outputs.body }}
           files: |
             rules/*.yaml
