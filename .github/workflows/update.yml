@@ -39,7 +39,7 @@ jobs:
       - name: Get date
         id: date
         run: |
-          echo "tag=$(date -u '+%Y%m%d')" >> $GITHUB_OUTPUT
+          echo "tag=$(date -u '+%Y%m%d%H%M%S%3N')" >> $GITHUB_OUTPUT
           echo "name=$(date -u '+%Y-%m-%d')" >> $GITHUB_OUTPUT
 
       - name: Push to rules branch
