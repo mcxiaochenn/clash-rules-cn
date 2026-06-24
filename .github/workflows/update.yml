@@ -20,6 +20,11 @@ jobs:
         with:
           ref: main
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -33,7 +38,9 @@ jobs:
 
       - name: Get date
         id: date
-        run: echo "tag=$(date -u '+%Y%m%d')" >> $GITHUB_OUTPUT && echo "name=$(date -u '+%Y-%m-%d')" >> $GITHUB_OUTPUT
+        run: |
+          echo "tag=$(date -u '+%Y%m%d')" >> $GITHUB_OUTPUT
+          echo "name=$(date -u '+%Y-%m-%d')" >> $GITHUB_OUTPUT
 
       - name: Push to rules branch
         run: |
@@ -50,9 +57,11 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: "rules-${{ steps.date.outputs.tag }}"
-          name: "Clash Rules ${{ steps.date.outputs.name }}"
+          tag_name: rules-${{ steps.date.outputs.tag }}
+          name: Clash Rules ${{ steps.date.outputs.name }}
           files: |
             rules/*.yaml
             geoip/*.mmdb
           generate_release_notes: true
+          draft: false
+          prerelease: false
