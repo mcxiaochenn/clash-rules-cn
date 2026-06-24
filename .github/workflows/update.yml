@@ -54,14 +54,29 @@ jobs:
           git diff --staged --quiet || git commit -m "chore: 更新规则文件 [$(date -u '+%Y-%m-%d %H:%M UTC')]"
           git push origin rules --force
 
+      - name: Generate release notes
+        id: notes
+        run: |
+          # 获取上一个 tag
+          PREV_TAG=$(git tag -l "rules-*" --sort=-version:refname | head -n 2 | tail -n 1)
+          if [ -z "$PREV_TAG" ]; then
+            echo "body=首次发布" >> $GITHUB_OUTPUT
+          else
+            # 基于 main 分支生成变更日志
+            NOTES=$(git log main --pretty=format:"- %s by @%an" "${PREV_TAG//rules-/}..HEAD" 2>/dev/null || echo "- 规则更新")
+            echo "body<<EOF" >> $GITHUB_OUTPUT
+            echo "$NOTES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: rules-${{ steps.date.outputs.tag }}
           name: Clash Rules ${{ steps.date.outputs.name }}
+          body: ${{ steps.notes.outputs.body }}
           files: |
             rules/*.yaml
             geoip/*.mmdb
-          generate_release_notes: true
           draft: false
           prerelease: false
