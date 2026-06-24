@@ -1,0 +1,53 @@
+name: Update Clash Rules
+
+on:
+  schedule:
+    # 每日 UTC 12:00（北京时间 20:00）
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+    # 允许手动触发
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Build
+        run: go build -o builder ./cmd/builder
+
+      - name: Run builder
+        run: ./builder
+
+      - name: Commit and push
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add rules/ geoip/
+          git diff --staged --quiet || git commit -m "chore: 更新规则文件 [$(date -u '+%Y-%m-%d %H:%M UTC')]"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "rules-$(date -u '+%Y%m%d')"
+          name: "Clash Rules $(date -u '+%Y-%m-%d')"
+          files: |
+            rules/*.yaml
+            geoip/*.mmdb
+          generate_release_notes: true

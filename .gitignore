@@ -1,0 +1,13 @@
+# Build output
+builder
+builder.exe
+
+# Generated rule files
+rules/
+
+# GeoIP downloaded data
+geoip/
+
+# OS files
+.DS_Store
+Thumbs.db
