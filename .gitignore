@@ -1,7 +1,7 @@
 # Build output
-builder
-builder.exe
-builder.exe~
+/builder
+/builder.exe
+/builder.exe~
 
 # Generated rule files
 rules/
