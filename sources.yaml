@@ -167,6 +167,12 @@ upstream:
     url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Copilot/Copilot.list"
     parser: "classical"
 
+  # chatgpt.com（自定义补充，上游源未覆盖）
+  ai_chatgpt:
+    parser: "static"
+    entries:
+      - "chatgpt.com"
+
   # anti-AD 广告域名
   anti_ad:
     url: "https://raw.githubusercontent.com/privacy-protection-tools/anti-AD/master/anti-ad-domains.txt"
@@ -265,7 +271,7 @@ output:
     filename: "ai-domain.yaml"
     description: "AI 服务相关域名"
     behavior: "domain"
-    sources: ["ai_dler", "ai_sukkaw", "ai_connershua", "ai_openai", "ai_gemini", "ai_claude", "ai_copilot"]
+    sources: ["ai_dler", "ai_sukkaw", "ai_connershua", "ai_openai", "ai_gemini", "ai_claude", "ai_copilot", "ai_chatgpt"]
 
   # IP 类规则
   telegram_ip:
