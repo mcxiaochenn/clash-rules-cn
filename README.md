@@ -1,6 +1,6 @@
 # Clash Rules CN  ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/mcxiaochenn/clash-rules-cn/total?logo=github) ![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/mcxiaochenn/clash-rules-cn/latest/total?logo=github) [![jsdelivr stats](https://data.jsdelivr.com/v1/package/gh/mcxiaochenn/clash-rules-cn/badge?style=rounded)](https://www.jsdelivr.com/package/gh/mcxiaochenn/clash-rules-cn)
 
-Clash 分流规则聚合系统，自动从多个上游源获取规则，合并去重后发布为 YAML rule-provider 文件。使用 GitHub Actions 每日自动构建，保证规则最新。
+Clash 分流规则聚合系统，自动从多个上游源获取规则，合并去重后发布为 YAML rule-provider 文件。使用 GitHub Actions 自动构建（main 分支 push 忽略文档文件 + 每日 UTC 12:00 定时 + 手动触发），构建产物推送到 `rules` 分支并通过 Release 发布，保证规则最新。
 
 ## 说明
 
@@ -238,6 +238,9 @@ rules:
 git clone https://github.com/mcxiaochenn/clash-rules-cn.git
 cd clash-rules-cn
 
+# 安装依赖（Go 1.22+）
+go mod tidy
+
 # 构建
 go build -o builder ./cmd/builder
 
@@ -255,7 +258,7 @@ clash-rules-cn/
 ├── internal/
 │   ├── config/                # 配置加载
 │   ├── fetcher/               # HTTP 并发拉取（3 次重试）
-│   ├── parser/                # 8 种解析器
+│   ├── parser/                # 8 种解析器（cidr/dnsmasq/domain-list/gfwlist/v2fly-dlc/classical/loyalsoldier/static）
 │   ├── merger/                # 合并去重排序
 │   ├── writer/                # YAML 流式输出
 │   └── types/                 # 共享类型
