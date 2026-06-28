@@ -17,7 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Clash proxy rule aggregation system. Fetches routing rules from multiple upstream sources, parses/merges/deduplicates them, and outputs YAML rule-provider files for mihomo. A GitHub Actions CI workflow runs daily to build and release.
+Clash proxy rule aggregation system. Fetches routing rules from multiple upstream sources, parses/merges/deduplicates them, and outputs YAML rule-provider files for mihomo. A GitHub Actions CI workflow runs on push to main (ignoring .md/.gitignore/LICENSE files), daily schedule, and manual trigger. It builds rules, pushes artifacts to the `rules` branch, and creates a GitHub Release with auto-generated release notes from commit history.
 
 ## Commands
 
@@ -31,6 +31,10 @@ go test ./internal/parser/...            # Run tests for a single package
 ```
 
 The compiled binary is `builder` (or `builder.exe` on Windows), output to project root.
+
+**依赖：** 仅一个外部依赖 `gopkg.in/yaml.v3 v3.0.1`，Go 版本 1.22。当前项目无测试文件（`*_test.go`），`go test ./...` 不会报错但也不做实际验证。
+
+**分支策略：** `main` 分支存放源码，`rules` 分支存放构建产物（`.yaml` + `.mmdb`），CI 在 main 构建后将产物 force push 到 rules 分支并打 `rules-<timestamp>` tag 创建 Release。
 
 ## Architecture
 
@@ -67,7 +71,7 @@ sources.yaml config
 | `dnsmasq` | `server=/domain/ip` | `DOMAIN-SUFFIX` | |
 | `domain-list` | One domain per line | `DOMAIN-SUFFIX` | |
 | `gfwlist` | Base64-encoded ABP rules | `DOMAIN-SUFFIX` | |
-| `v2fly-dlc` | `domain:/full:/keyword:` + direct domains | `DOMAIN-SUFFIX` / `DOMAIN` / `DOMAIN-KEYWORD` | Supports `include:` recursive parsing with concurrent downloads and global cache |
+| `v2fly-dlc` | `domain:/full:/keyword:` + direct domains | `DOMAIN-SUFFIX` / `DOMAIN` / `DOMAIN-KEYWORD` | Supports `include:` recursive parsing with concurrent downloads and global cache. Strips `@cn`/`@geoip` suffixes from payloads. |
 | `classical` | `TYPE,payload` format | preserved as-is | |
 | `loyalsoldier` | YAML `payload:` list | auto-detected: `DOMAIN-SUFFIX` / `IP-CIDR` / `IP-CIDR6` | Handles `+.domain` format |
 | `static` | Inline entries from config | auto-detected | |
@@ -87,7 +91,7 @@ sources.yaml config
 
 ## Output
 
-12 rule files in `rules/` (9 domain-type, 3 IP-CIDR-type) plus GeoIP MMDB/ASN files in `geoip/`. Rules are published to the `rules` branch and accessible via CDN:
+13 rule files in `rules/` (10 domain-type, 3 IP-CIDR-type) plus GeoIP MMDB/ASN files in `geoip/`. Rules are published to the `rules` branch and accessible via CDN:
 - `https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/rules/{filename}`
 - `https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/rules/{filename}`
 
@@ -98,4 +102,4 @@ sources.yaml config
 - DOMAIN-KEYWORD entries are dropped when writing `behavior: domain` output
 - GeoIP files use MMDB+ASN format only (no legacy .dat)
 - License: AGPL v3
-- Primary design document is `记录.md` (Chinese) — consult it for upstream source details
+- Primary design document is `记录.md` (Chinese) — consult it for upstream source details and original design rationale. Note: some details in that document are outdated (e.g., it says include is not recursively resolved, but the code does); trust the actual code over the design doc for implementation details.
