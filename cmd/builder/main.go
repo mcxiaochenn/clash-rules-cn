@@ -17,6 +17,11 @@ import (
 	"clash-rules-cn/internal/writer"
 )
 
+// maxFailRatio 允许失败的上游数据源比例。
+// 此前单个源拉取/解析失败只打印日志并 continue，进程仍以 0 退出，
+// 会静默产出残缺规则并照常发布到 rules 分支与 Release。
+const maxFailRatio = 0.2
+
 func main() {
 	log.Println("开始构建 Clash 规则...")
 
@@ -43,9 +48,11 @@ func main() {
 
 	// 收集拉取结果
 	fetchResults := make(map[string][]byte)
+	failed := 0
 	for result := range results {
 		if result.Error != nil {
 			log.Printf("拉取 %s 失败: %v", result.Name, result.Error)
+			failed++
 			continue
 		}
 		fetchResults[result.Name] = result.Content
@@ -81,12 +88,18 @@ func main() {
 			entries, err = p.Parse(data)
 			if err != nil {
 				log.Printf("解析 %s 失败: %v", name, err)
+				failed++
 				continue
 			}
 		}
 
 		parsedData[name] = entries
 		log.Printf("解析 %s 完成: %d 条规则", name, len(entries))
+	}
+
+	// 上游失败过多时中止构建，避免残缺规则被发布
+	if len(cfg.Upstream) > 0 && float64(failed)/float64(len(cfg.Upstream)) > maxFailRatio {
+		log.Fatalf("数据源失败过多: %d/%d（阈值 %.0f%%），中止构建", failed, len(cfg.Upstream), maxFailRatio*100)
 	}
 
 	// 创建 writer

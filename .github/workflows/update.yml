@@ -16,27 +16,29 @@ on:
 permissions:
   contents: write
 
+# 避免定时与手动触发并发时对 rules 分支的 --force 推送互相覆盖
+concurrency:
+  group: update-rules
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout main
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: main
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
+          cache: true
 
       - name: Build
         run: go build -o builder ./cmd/builder
