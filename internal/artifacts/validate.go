@@ -71,7 +71,7 @@ func Validate(cfg *config.Config, rulesDir, geoDir string) error {
 		return err
 	}
 	if string(got) != want {
-		return fmt.Errorf("配置正文不符合六项 URL 替换约定")
+		return fmt.Errorf("配置正文不符合六项分流和两项数据库 URL 替换约定")
 	}
 	section, count := "", 0
 	for _, line := range strings.Split(want, "\n") {
@@ -104,8 +104,17 @@ func Validate(cfg *config.Config, rulesDir, geoDir string) error {
 		if err != nil {
 			return err
 		}
-		if !bytes.Contains(body, []byte("\xab\xcd\xefMaxMind.com")) {
+		marker := []byte("\xab\xcd\xefMaxMind.com")
+		metadataStart := bytes.LastIndex(body, marker)
+		if metadataStart < 0 {
 			return fmt.Errorf("无效 MMDB: %s", file.Filename)
+		}
+		expectedType := "GeoLite2-Country"
+		if file.Filename == "GeoLite2-ASN.mmdb" {
+			expectedType = "GeoLite2-ASN"
+		}
+		if !bytes.Contains(body[metadataStart+len(marker):], []byte(expectedType)) {
+			return fmt.Errorf("数据库 %s 类型错误，预期 %s", file.Filename, expectedType)
 		}
 	}
 	return nil

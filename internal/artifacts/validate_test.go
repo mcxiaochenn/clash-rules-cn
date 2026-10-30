@@ -15,7 +15,7 @@ func TestPublishGate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cases := []string{"valid", "missing-rule", "empty-rule", "invalid-rule", "duplicate-rule", "changed-config", "missing-mmdb", "invalid-mmdb", "empty-yaml", "extra-rule", "malformed-yaml", "legacy-gfw"}
+	cases := []string{"valid", "missing-rule", "empty-rule", "invalid-rule", "duplicate-rule", "changed-config", "missing-mmdb", "invalid-mmdb", "empty-yaml", "extra-rule", "malformed-yaml", "legacy-gfw", "wrong-asn-type"}
 	for _, name := range cases {
 		t.Run(name, func(t *testing.T) {
 			root := t.TempDir()
@@ -49,7 +49,11 @@ func TestPublishGate(t *testing.T) {
 			write(filepath.Join(loonDir, "LICENSE"), string(loontemplate.License))
 			write(filepath.Join(loonDir, "README.md"), "署名")
 			for _, file := range cfg.GeoIP.Files {
-				write(filepath.Join(geoDir, file.Filename), "test\xab\xcd\xefMaxMind.com")
+				dbType := "GeoLite2-Country"
+				if file.Filename == "GeoLite2-ASN.mmdb" {
+					dbType = "GeoLite2-ASN"
+				}
+				write(filepath.Join(geoDir, file.Filename), "test\xab\xcd\xefMaxMind.com"+dbType)
 			}
 			target := filepath.Join(loonDir, "telegram.lsr")
 			switch name {
@@ -69,6 +73,8 @@ func TestPublishGate(t *testing.T) {
 				if err := os.Remove(filepath.Join(geoDir, cfg.GeoIP.Files[0].Filename)); err != nil {
 					t.Fatal(err)
 				}
+			case "wrong-asn-type":
+				write(filepath.Join(geoDir, "GeoLite2-ASN.mmdb"), "test\xab\xcd\xefMaxMind.comGeoLite2-Country")
 			case "invalid-mmdb":
 				write(filepath.Join(geoDir, cfg.GeoIP.Files[0].Filename), "not mmdb")
 			case "empty-yaml":

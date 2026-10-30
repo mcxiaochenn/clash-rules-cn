@@ -16,7 +16,8 @@ Clash 分流规则聚合系统，自动从多个上游源获取规则，合并�
 | [felixonmars/dnsmasq-china-list](https://github.com/felixonmars/dnsmasq-china-list) | felixonmars | 国内直连域名（dnsmasq 格式） |
 | [v2fly/domain-list-community](https://github.com/v2fly/domain-list-community) | v2fly | 各分类域名列表（支持 `include:` 递归解析） |
 | [Loyalsoldier/clash-rules](https://github.com/Loyalsoldier/clash-rules) | Loyalsoldier | Clash 分流规则（域名 + IP CIDR） |
-| [Loyalsoldier/geoip](https://github.com/Loyalsoldier/geoip) | Loyalsoldier | GeoIP MMDB/ASN 数据 |
+| [Loyalsoldier/geoip](https://github.com/Loyalsoldier/geoip) | Loyalsoldier | GeoIP 国家库 |
+| [P3TERX/GeoLite.mmdb](https://github.com/P3TERX/GeoLite.mmdb) | P3TERX / MaxMind | IP→ASN 数据库 |
 | [blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script) | blackmatrix7 | iOS 分流规则脚本 |
 | [gfwlist/gfwlist](https://github.com/gfwlist/gfwlist) | gfwlist | GFW 域名列表 |
 | [privacy-protection-tools/anti-AD](https://github.com/privacy-protection-tools/anti-AD) | privacy-protection-tools | 广告域名拦截列表 |
@@ -78,12 +79,19 @@ Clash 分流规则聚合系统，自动从多个上游源获取规则，合并�
 
 #### GeoIP 文件
 
+Loon 的 `geoip-url` 使用 `Country.mmdb`，`ipasn-url` 使用 `GeoLite2-ASN.mmdb`。历史 `Country-asn.mmdb` 的类型仍是 `GeoLite2-Country`，保留现有地址，但不能拿它替代 IP→ASN 查询库。
+
 - **Country.mmdb**：
   - [https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/Country.mmdb](https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/Country.mmdb)
   - [https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/Country.mmdb](https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/Country.mmdb)
 - **Country-asn.mmdb**：
   - [https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/Country-asn.mmdb](https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/Country-asn.mmdb)
   - [https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/Country-asn.mmdb](https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/Country-asn.mmdb)
+
+- **GeoLite2-ASN.mmdb（IP→ASN）**：
+  - [Raw 地址](https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/GeoLite2-ASN.mmdb)
+  - [CDN 地址](https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/GeoLite2-ASN.mmdb)
+  - 上游：[P3TERX/GeoLite.mmdb](https://github.com/P3TERX/GeoLite.mmdb)，数据归 MaxMind，遵循该上游列明的 GeoLite2 许可条款。
 
 ### 使用方式
 
@@ -284,9 +292,9 @@ clash-rules-cn/
 https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/loon/Loon_Auto_Select_Config.lcf
 ```
 
-先备份 Loon 现有配置，再通过「从 URL 下载」导入，并添加自己的节点订阅。配置来自可莉自动配置固定快照，构建仅替换 `[Remote Rule]` 六个 URL，其余正文、策略及插件保持原样。上游版本与许可见 [固定快照说明](templates/loon/README.md)。配置模板不会随定时任务自动追随上游修改。
+先备份 Loon 现有配置，再通过「从 URL 下载」导入，并添加自己的节点订阅。配置来自可莉自动配置固定快照，构建仅替换 `[Remote Rule]` 六个 URL 和 `[General]` 的 GeoIP / ASN 两个数据库 URL，其余正文、策略及插件保持原样。上游版本与许可见 [固定快照说明](templates/loon/README.md)。配置模板不会随定时任务自动追随上游修改。
 
-**插件及 GeoIP 地址仍指向原服务。分流换源不代表原插件恢复下载，已有缓存的用户请勿因换源而清除插件缓存或重装 Loon。** 本仓库不分发可莉插件。
+**插件地址仍指向原服务。分流和数据库换源不代表原插件恢复下载，已有缓存的用户请勿因换源而清除插件缓存或重装 Loon。** 本仓库不分发可莉插件。
 
 ### 规则订阅地址
 

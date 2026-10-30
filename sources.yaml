@@ -310,6 +310,9 @@ geoip:
       filename: "Country.mmdb"
     - url: "https://github.com/Loyalsoldier/geoip/releases/latest/download/Country-asn.mmdb"
       filename: "Country-asn.mmdb"
+    # Country-asn 是国家库，不能用作 Loon 的 IP→ASN 查询库。
+    - url: "https://raw.githubusercontent.com/P3TERX/GeoLite.mmdb/download/GeoLite2-ASN.mmdb"
+      filename: "GeoLite2-ASN.mmdb"
 
 # Loon 专用组合规则，不进入 Clash output。
 loon_output:
