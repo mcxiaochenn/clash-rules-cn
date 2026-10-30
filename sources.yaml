@@ -210,6 +210,17 @@ upstream:
       - "fc00::/7"
       - "fe80::/10"
 
+  # Loon 原生规则；独立于现有 Clash 输出，保留 USER-AGENT / IP-ASN 参数。
+  loon_telegram:
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Telegram/Telegram.list"
+    parser: "classical"
+  loon_tiktok:
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/TikTok/TikTok.list"
+    parser: "classical"
+  loon_speedtest:
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Speedtest/Speedtest.list"
+    parser: "classical"
+
 # 输出规则配置
 output:
   # 域名类规则
@@ -299,3 +310,31 @@ geoip:
       filename: "Country.mmdb"
     - url: "https://github.com/Loyalsoldier/geoip/releases/latest/download/Country-asn.mmdb"
       filename: "Country-asn.mmdb"
+
+# Loon 专用组合规则，不进入 Clash output。
+loon_output:
+  telegram:
+    filename: "telegram.lsr"
+    description: "Telegram 域名与 IP"
+    behavior: "classical"
+    sources: ["v2fly_telegram", "telegram_ip", "loyalsoldier_telegramcidr", "loon_telegram"]
+  tiktok:
+    filename: "tiktok.lsr"
+    description: "TikTok"
+    behavior: "classical"
+    sources: ["loon_tiktok"]
+  speedtest_international:
+    filename: "speedtest-international.lsr"
+    description: "Speedtest（blackmatrix7 规则，非可莉原规则逐条复制）"
+    behavior: "classical"
+    sources: ["loon_speedtest"]
+  lan:
+    filename: "lan.lsr"
+    description: "私有域名与局域网 IP"
+    behavior: "classical"
+    sources: ["v2fly_private", "loyalsoldier_private", "lan_reserved", "loyalsoldier_lancidr"]
+  cn_region:
+    filename: "cn-region.lsr"
+    description: "中国大陆直连域名与 IP"
+    behavior: "classical"
+    sources: ["dnsmasq_china", "v2fly_cn", "loyalsoldier_direct", "ios_rule_direct", "china_ip", "loyalsoldier_cncidr"]

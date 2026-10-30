@@ -1,0 +1,2 @@
+# 固定快照按原始字节保存，避免 Windows 换行转换破坏校验。
+templates/loon/upstream.lcf -text

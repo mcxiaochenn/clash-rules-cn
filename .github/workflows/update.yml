@@ -40,11 +40,23 @@ jobs:
           go-version: '1.22'
           cache: true
 
+      - name: Test
+        run: |
+          go test ./...
+          go vet ./...
+
       - name: Build
         run: go build -o builder ./cmd/builder
 
       - name: Run builder
         run: ./builder
+
+      - name: Validate and stage artifacts
+        run: |
+          go run ./cmd/check
+          mkdir -p "$RUNNER_TEMP/rules-publish/loon"
+          cp rules/*.yaml geoip/*.mmdb "$RUNNER_TEMP/rules-publish/"
+          cp rules/loon/*.lsr rules/loon/*.lcf rules/loon/LICENSE rules/loon/README.md "$RUNNER_TEMP/rules-publish/loon/"
 
       - name: Get date
         id: date
@@ -57,9 +69,8 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git checkout --orphan rules
           git rm -rf .
-          cp rules/*.yaml . 2>/dev/null || true
-          cp geoip/*.mmdb . 2>/dev/null || true
-          git add -f *.yaml *.mmdb
+          cp -R "$RUNNER_TEMP/rules-publish/." .
+          git add -f *.yaml *.mmdb loon/
           git diff --staged --quiet || git commit -m "chore: 更新规则文件 [$(date -u '+%Y-%m-%d %H:%M UTC')]"
           git push origin rules --force
 
@@ -95,7 +106,12 @@ jobs:
           name: Clash Rules ${{ steps.date.outputs.tag }}
           body: ${{ steps.notes.outputs.body }}
           files: |
-            rules/*.yaml
-            geoip/*.mmdb
+            ${{ runner.temp }}/rules-publish/*.yaml
+            ${{ runner.temp }}/rules-publish/*.mmdb
+            ${{ runner.temp }}/rules-publish/loon/*.lsr
+            ${{ runner.temp }}/rules-publish/loon/*.lcf
+            ${{ runner.temp }}/rules-publish/loon/LICENSE
+            ${{ runner.temp }}/rules-publish/loon/README.md
+          fail_on_unmatched_files: true
           draft: false
           prerelease: false

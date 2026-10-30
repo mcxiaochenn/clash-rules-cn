@@ -7,14 +7,17 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
+	"clash-rules-cn/internal/artifacts"
 	"clash-rules-cn/internal/config"
 	"clash-rules-cn/internal/fetcher"
 	"clash-rules-cn/internal/merger"
 	"clash-rules-cn/internal/parser"
 	"clash-rules-cn/internal/types"
 	"clash-rules-cn/internal/writer"
+	loontemplate "clash-rules-cn/templates/loon"
 )
 
 // maxFailRatio 允许失败的上游数据源比例。
@@ -23,7 +26,7 @@ import (
 const maxFailRatio = 0.2
 
 func main() {
-	log.Println("开始构建 Clash 规则...")
+	log.Println("开始构建 Clash / Loon 规则...")
 
 	// 加载配置
 	cfg, err := config.Load("sources.yaml")
@@ -104,36 +107,76 @@ func main() {
 
 	// 创建 writer
 	w := writer.New("rules")
+	lw := writer.New(filepath.Join("rules", "loon"))
 
 	// 处理每个输出规则
 	log.Println("正在生成规则文件...")
 	for ruleName, rule := range cfg.Output {
 		// 收集该规则的所有条目
-		var allEntries []types.Entry
+		var allEntries, legacyEntries []types.Entry
 		for _, sourceName := range rule.Sources {
 			if entries, exists := parsedData[sourceName]; exists {
 				allEntries = append(allEntries, entries...)
+				legacyEntries = append(legacyEntries, clashCompatibleEntries(cfg.Upstream[sourceName].Parser, entries)...)
 			}
 		}
 
 		// 合并去重排序
-		merged := merger.Merge(allEntries, rule.Behavior)
+		merged := merger.Merge(legacyEntries, rule.Behavior)
 
 		// 写入文件
 		if err := w.Write(rule.Filename, rule.Description, rule.Behavior, merged); err != nil {
-			log.Printf("写入 %s 失败: %v", ruleName, err)
-			continue
+			log.Fatalf("写入 %s 失败: %v", ruleName, err)
+		}
+
+		loonFilename := strings.TrimSuffix(rule.Filename, filepath.Ext(rule.Filename)) + ".lsr"
+		if err := lw.WriteLoon(loonFilename, merger.MergeLoon(allEntries, rule.Behavior)); err != nil {
+			log.Fatalf("写入 %s 失败: %v", loonFilename, err)
 		}
 
 		log.Printf("生成 %s 完成: %d 条规则", rule.Filename, len(merged))
 	}
 
+	for name, rule := range cfg.LoonOutput {
+		var entries []types.Entry
+		for _, source := range rule.Sources {
+			data, ok := parsedData[source]
+			if !ok || len(data) == 0 {
+				log.Fatalf("Loon 规则 %s 缺少上游 %s", name, source)
+			}
+			entries = append(entries, data...)
+		}
+		if err := lw.WriteLoon(rule.Filename, merger.MergeLoon(entries, rule.Behavior)); err != nil {
+			log.Fatalf("写入 %s 失败: %v", rule.Filename, err)
+		}
+	}
+	configText, err := loontemplate.Generate()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join("rules", "loon", loontemplate.ConfigFilename), []byte(configText), 0644); err != nil {
+		log.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join("rules", "loon", "LICENSE"), loontemplate.License, 0644); err != nil {
+		log.Fatal(err)
+	}
+	attribution, err := os.ReadFile("templates/loon/README.md")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join("rules", "loon", "README.md"), attribution, 0644); err != nil {
+		log.Fatal(err)
+	}
+
 	// 下载 GeoIP 文件
 	log.Println("正在下载 GeoIP 文件...")
 	if err := downloadGeoIP(cfg.GeoIP); err != nil {
-		log.Printf("下载 GeoIP 文件失败: %v", err)
+		log.Fatalf("下载 GeoIP 文件失败: %v", err)
 	}
 
+	if err := artifacts.Validate(cfg, "rules", "geoip"); err != nil {
+		log.Fatalf("产物验证失败: %v", err)
+	}
 	log.Println("构建完成!")
 }
 
@@ -171,18 +214,39 @@ func downloadGeoIP(geoipConfig config.GeoIPConfig) error {
 		}
 
 		// 写入文件
-		outFile, err := os.Create(filePath)
+		outFile, err := os.Create(filePath + ".tmp")
 		if err != nil {
 			return fmt.Errorf("创建文件 %s 失败: %w", file.Filename, err)
 		}
-		defer outFile.Close()
 
 		if _, err := io.Copy(outFile, resp.Body); err != nil {
+			outFile.Close()
 			return fmt.Errorf("写入文件 %s 失败: %w", file.Filename, err)
 		}
 
+		if err := outFile.Close(); err != nil {
+			return fmt.Errorf("关闭 %s 失败: %w", file.Filename, err)
+		}
+		if err := os.Rename(filePath+".tmp", filePath); err != nil {
+			return err
+		}
 		log.Printf("下载 %s 完成", file.Filename)
 	}
 
 	return nil
+}
+
+// clashCompatibleEntries 保留旧解析器的 IPv6 类型排序和去重行为，避免改变现有 YAML 字节。
+// Loon 始终使用修正后的原始条目；修复旧 Clash 数据语义需另行迁移。
+func clashCompatibleEntries(parserType string, entries []types.Entry) []types.Entry {
+	if parserType != "static" && parserType != "loyalsoldier" {
+		return entries
+	}
+	result := append([]types.Entry(nil), entries...)
+	for i := range result {
+		if result[i].Type == "IP-CIDR6" {
+			result[i].Type = "IP-CIDR"
+		}
+	}
+	return result
 }

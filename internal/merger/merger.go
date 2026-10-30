@@ -1,6 +1,7 @@
 package merger
 
 import (
+	"log"
 	"sort"
 	"strings"
 
@@ -74,4 +75,36 @@ func sortEntries(entries []types.Entry) {
 		// 再按 Payload 排序（不区分大小写）
 		return strings.ToLower(entries[i].Payload) < strings.ToLower(entries[j].Payload)
 	})
+}
+
+// MergeLoon 将 applications 上游被旧解析器包装的进程规则恢复为原生类型。
+// 该转换只用于 Loon，Clash 沿用现有解析及输出以保持兼容。
+func MergeLoon(entries []types.Entry, behavior string) []types.Entry {
+	var normalized, processes []types.Entry
+	for _, entry := range entries {
+		if entry.Type == "DOMAIN" || entry.Type == "DOMAIN-SUFFIX" || entry.Type == "DOMAIN-KEYWORD" {
+			// Surge extended-matching 没有 Loon 对应参数，保留域名匹配并显式报告降级。
+			if strings.HasSuffix(entry.Payload, ",extended-matching") {
+				log.Printf("Loon 格式转换: %s,%s 移除 Surge 专用 extended-matching（不承诺 CNAME 扩展匹配）", entry.Type, entry.Payload)
+				entry.Payload = strings.TrimSuffix(entry.Payload, ",extended-matching")
+			}
+			// v2fly 原始数据可能在域名后保留行内注释，不能写进 Loon 匹配值。
+			payload, _, _ := strings.Cut(entry.Payload, " #")
+			entry.Payload = strings.TrimSpace(payload)
+			if entry.Payload == "http:" || entry.Payload == "https:" {
+				log.Printf("Loon 格式转换: 排除 GFWList 旧解析产生的协议伪域名 %q", entry.Payload)
+				continue
+			}
+		}
+		if entry.Type == "DOMAIN-SUFFIX" && strings.HasPrefix(entry.Payload, "PROCESS-NAME,") {
+			entry = types.Entry{Type: "PROCESS-NAME", Payload: strings.TrimPrefix(entry.Payload, "PROCESS-NAME,")}
+		}
+		if behavior == "domain" && entry.Type == "PROCESS-NAME" {
+			processes = append(processes, entry)
+		} else {
+			normalized = append(normalized, entry)
+		}
+	}
+	filtered := filterByBehavior(normalized, behavior)
+	return Merge(append(filtered, processes...), "classical")
 }

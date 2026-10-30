@@ -32,7 +32,7 @@ go test ./internal/parser/...            # Run tests for a single package
 
 The compiled binary is `builder` (or `builder.exe` on Windows), output to project root.
 
-**依赖：** 仅一个外部依赖 `gopkg.in/yaml.v3 v3.0.1`，Go 版本 1.22。当前项目无测试文件（`*_test.go`），`go test ./...` 不会报错但也不做实际验证。
+**依赖：** 仅一个外部依赖 `gopkg.in/yaml.v3 v3.0.1`，Go 版本 1.22。已有 Loon 语法、IPv6、合并、Clash 字节兼容、固定模板及发布产物检查测试。
 
 **分支策略：** `main` 分支存放源码，`rules` 分支存放构建产物（`.yaml` + `.mmdb`），CI 在 main 构建后将产物 force push 到 rules 分支并打 `rules-<timestamp>` tag 创建 Release。
 
@@ -92,8 +92,8 @@ sources.yaml config
 ## Output
 
 13 rule files in `rules/` (10 domain-type, 3 IP-CIDR-type) plus GeoIP MMDB/ASN files in `geoip/`. Rules are published to the `rules` branch and accessible via CDN:
-- `https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/rules/{filename}`
-- `https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/rules/{filename}`
+- `https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/{filename}`
+- `https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/{filename}`
 
 ## Design Notes
 
@@ -103,3 +103,13 @@ sources.yaml config
 - GeoIP files use MMDB+ASN format only (no legacy .dat)
 - License: AGPL v3
 - Primary design document is `记录.md` (Chinese) — consult it for upstream source details and original design rationale. Note: some details in that document are outdated (e.g., it says include is not recursively resolved, but the code does); trust the actual code over the design doc for implementation details.
+
+
+## Loon 输出约定
+
+- 13 个既有 YAML 原样兼容；新增 18 个原生规则位于 `rules/loon/`，发布分支路径为 `loon/`。
+- `sources.yaml` 的 `loon_output` 仅用于五个 Loon 组合输出，复用 OutputRule，使用 classical 行为。
+- Loon 写出前恢复 applications 进程规则并清理域名行内注释，保留关键词和 IPv6 类型；Clash 用兼容路径保持旧输出字节。
+- 固定可莉模板在 `templates/loon/`，仅替换六项分流 URL，不能修改其他配置或自动追随上游；独立 CC BY-NC-SA 4.0 许可。
+- `go run ./cmd/check` 校验发布产物；CI 暂存后发布根目录 YAML/MMDB 和 `loon/`，Release 同步附带新文件。
+- 测试通过不等于真机验收；首次发布后需核验 Raw 地址和 Release 内容。

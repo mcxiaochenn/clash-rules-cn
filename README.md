@@ -270,3 +270,75 @@ clash-rules-cn/
 ## 许可证
 
 [AGPL-3.0](LICENSE)
+
+
+## Loon 原生规则与自动配置
+
+从现有统一规则条目直接生成 Loon `.lsr`，不经过在线转换服务。现有 13 个 Clash YAML 地址、格式和行为保持兼容，GeoIP 数据库仍发布到 `rules` 分支根目录。
+
+### 自动配置
+
+配置下载地址：
+
+```text
+https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/loon/Loon_Auto_Select_Config.lcf
+```
+
+先备份 Loon 现有配置，再通过「从 URL 下载」导入，并添加自己的节点订阅。配置来自可莉自动配置固定快照，构建仅替换 `[Remote Rule]` 六个 URL，其余正文、策略及插件保持原样。上游版本与许可见 [固定快照说明](templates/loon/README.md)。配置模板不会随定时任务自动追随上游修改。
+
+**插件及 GeoIP 地址仍指向原服务。分流换源不代表原插件恢复下载，已有缓存的用户请勿因换源而清除插件缓存或重装 Loon。** 本仓库不分发可莉插件。
+
+### 规则订阅地址
+
+所有 Loon 文件位于 `rules` 分支的 `loon/` 目录：
+
+```text
+https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/loon/<文件名>
+https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/loon/<文件名>
+```
+
+| 文件 | 用途 | 自动配置策略 |
+|------|------|------|
+| `telegram.lsr` | Telegram 域名、IP 与 ASN | 兜底后备策略 |
+| `tiktok.lsr` | TikTok 等上游收录服务 | 新国手动策略 |
+| `ai-domain.lsr` | AI 服务 | 美国手动策略 |
+| `speedtest-international.lsr` | Speedtest 测速服务 | 全球手动策略 |
+| `lan.lsr` | 私有域名与局域网、保留 IP | DIRECT |
+| `cn-region.lsr` | 国内直连域名与中国大陆 IP | DIRECT |
+
+另外为现有 13 个 YAML 各提供一个同名 `.lsr`：`direct-domain`、`proxy-domain`、`reject-domain`、`private-domain`、`apple-direct`、`icloud-domain`、`gfwlist-domain`、`non-china-tld`、`common-software`、`ai-domain`、`telegram-ip`、`lan-reserved-ip`、`china-ip`。合计 18 个 Loon 规则文件，规则中不写策略名，通过 `[Remote Rule]` 的 `policy` 指定。
+
+例如：
+
+```ini
+[Remote Rule]
+https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/loon/ai-domain.lsr, policy=美国手动策略, tag=AI, enabled=true
+```
+
+### 覆盖范围与兼容说明
+
+- Loon 原生保留域名精确匹配、后缀、关键词、IPv4/IPv6 CIDR；补充上游中的 USER-AGENT、IP-ASN 与 no-resolve 参数也保留。
+- `common-software.lsr` 将 applications 来源的进程条目恢复为 PROCESS-NAME，不把进程名当作域名；进程规则的实际适用性由 Loon 平台能力决定。
+- Loon 路径清理域名行内注释，并修正 IPv6 类型；Clash 路径保留既有字节输出，包括旧解析的排序和类型兼容行为。旧 Clash 数据语义问题不在本次迁移范围。
+- TikTok、Telegram 补充规则及 Speedtest 来源于 blackmatrix7；Speedtest 文件名对应原配置的 Speedtest Intl，但覆盖范围遵循该上游，**并非可莉原规则的逐条等价副本**。其余组合规则也采用本仓库聚合范围。
+- `cn-region.lsr` 使用明确的国内域名和 CIDR，而不是可莉原区域分流文件；模板里的原始 GEOIP 注释保留，实际内容以本仓库规则为准。
+- Surge 域名规则的 `extended-matching` 在 Loon 中没有对应参数；转换时显式记录日志并保留基本域名匹配，不承诺 CNAME 扩展匹配等价。其他未知类型或参数会阻止发布。
+- 旧 GFWList 解析生成的 `http:` / `https:` 伪域名在 Loon 路径显式记录并排除；为满足字节兼容约定，Clash 历史条目仍保留，产物校验只对这两个已知旧条目作兼容放行。
+- 本次不自动启用 `reject-domain.lsr`，完整配置仍仅包含原来的六项分流订阅。
+
+### 构建、验证和发布
+
+```bash
+go test ./...
+go vet ./...
+go run ./cmd/builder
+go run ./cmd/check
+```
+
+`rules/` 下保留 13 个 YAML，并生成 `rules/loon/` 下的 18 个 LSR、一个 LCF 及署名/许可文件。写入、刷新、必需组合源缺失或产物校验失败会终止构建。发布前检查规则类型、协议族、重复条目、空文件、配置引用及 MMDB 标记。
+
+CI 先将产物完整暂存，再发布到 `rules` 分支；Release 同步提供全部格式。保留原有更新触发方式。验证分为固定输入下的 Clash 字节兼容测试、Loon 格式测试、真实上游构建和线上产物检查；真机导入与实际网络体验需单独验证。
+
+### 许可
+
+仓库代码沿用 AGPL-3.0。可莉模板原件及仅换源修改版单独遵循 CC BY-NC-SA 4.0，保留作者署名、上游提交和修改说明，见 [模板许可](templates/loon/LICENSE)。上游规则保留来源说明并遵循各自许可。

@@ -3,15 +3,18 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
 
 // Config 表示整个配置文件的结构
 type Config struct {
-	Upstream map[string]UpstreamSource `yaml:"upstream"`
-	Output   map[string]OutputRule     `yaml:"output"`
-	GeoIP    GeoIPConfig               `yaml:"geoip"`
+	Upstream   map[string]UpstreamSource `yaml:"upstream"`
+	Output     map[string]OutputRule     `yaml:"output"`
+	LoonOutput map[string]OutputRule     `yaml:"loon_output"`
+	GeoIP      GeoIPConfig               `yaml:"geoip"`
 }
 
 // UpstreamSource 表示一个上游数据源
@@ -74,24 +77,59 @@ func (c *Config) Validate() error {
 		}
 	}
 
+	// 验证输出文件名，防止两种输出互相覆盖。
+	filenames := make(map[string]bool)
+	for name, rule := range c.Output {
+		if filepath.Base(rule.Filename) != rule.Filename || !strings.HasSuffix(rule.Filename, ".yaml") {
+			return fmt.Errorf("无效 Clash 文件名: %s", name)
+		}
+		key := strings.TrimSuffix(rule.Filename, ".yaml") + ".lsr"
+		if filenames[key] {
+			return fmt.Errorf("重复输出文件: %s", key)
+		}
+		filenames[key] = true
+	}
+	for name, rule := range c.LoonOutput {
+		if filepath.Base(rule.Filename) != rule.Filename || !strings.HasSuffix(rule.Filename, ".lsr") {
+			return fmt.Errorf("无效 Loon 文件名: %s", name)
+		}
+		if filenames[rule.Filename] {
+			return fmt.Errorf("重复输出文件: %s", rule.Filename)
+		}
+		filenames[rule.Filename] = true
+	}
 	// 验证输出规则配置
 	for name, rule := range c.Output {
-		if rule.Filename == "" {
-			return fmt.Errorf("输出规则 %s 缺少 filename", name)
-		}
-		if rule.Behavior == "" {
-			return fmt.Errorf("输出规则 %s 缺少 behavior", name)
-		}
-		if rule.Behavior != "domain" && rule.Behavior != "ipcidr" && rule.Behavior != "classical" {
-			return fmt.Errorf("输出规则 %s 的 behavior 无效: %s", name, rule.Behavior)
-		}
-		// 验证引用的上游源是否存在
-		for _, sourceName := range rule.Sources {
-			if _, exists := c.Upstream[sourceName]; !exists {
-				return fmt.Errorf("输出规则 %s 引用了不存在的上游源: %s", name, sourceName)
-			}
+		if err := c.validateOutput(name, rule); err != nil {
+			return err
 		}
 	}
+	for name, rule := range c.LoonOutput {
+		if rule.Behavior != "classical" {
+			return fmt.Errorf("Loon 输出 %s 必须使用 classical", name)
+		}
+		if err := c.validateOutput(name, rule); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
+func (c *Config) validateOutput(name string, rule OutputRule) error {
+	if rule.Filename == "" {
+		return fmt.Errorf("输出规则 %s 缺少 filename", name)
+	}
+	if rule.Behavior == "" {
+		return fmt.Errorf("输出规则 %s 缺少 behavior", name)
+	}
+	if rule.Behavior != "domain" && rule.Behavior != "ipcidr" && rule.Behavior != "classical" {
+		return fmt.Errorf("输出规则 %s 的 behavior 无效: %s", name, rule.Behavior)
+	}
+	// 验证引用的上游源是否存在
+	for _, sourceName := range rule.Sources {
+		if _, exists := c.Upstream[sourceName]; !exists {
+			return fmt.Errorf("输出规则 %s 引用了不存在的上游源: %s", name, sourceName)
+		}
+	}
 	return nil
 }

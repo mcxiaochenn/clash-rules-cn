@@ -171,12 +171,12 @@ func (p *GFWListParser) Parse(data []byte) ([]types.Entry, error) {
 
 // V2flyDLCParser 解析 v2fly domain-list-community 格式
 type V2flyDLCParser struct {
-	client     *http.Client
-	baseURL    string
-	visited    map[string]bool
-	visitedMu  sync.Mutex
-	cache      map[string][]byte
-	cacheMu    sync.RWMutex
+	client    *http.Client
+	baseURL   string
+	visited   map[string]bool
+	visitedMu sync.Mutex
+	cache     map[string][]byte
+	cacheMu   sync.RWMutex
 }
 
 // 全局缓存，所有 V2flyDLCParser 实例共享
@@ -447,9 +447,9 @@ func (p *LoyalsoldierParser) Parse(data []byte) ([]types.Entry, error) {
 		}
 
 		// 自动检测类型
-		if _, _, err := net.ParseCIDR(line); err == nil {
+		if ip, _, err := net.ParseCIDR(line); err == nil {
 			entryType := "IP-CIDR"
-			if ip := net.ParseIP(line); ip != nil && ip.To4() == nil {
+			if ip.To4() == nil {
 				entryType = "IP-CIDR6"
 			}
 			entries = append(entries, types.Entry{
@@ -484,12 +484,11 @@ func ParseStatic(entries []string) []types.Entry {
 
 	for _, entry := range entries {
 		// 尝试解析为 CIDR
-		_, _, err := net.ParseCIDR(entry)
+		ip, _, err := net.ParseCIDR(entry)
 		if err == nil {
 			entryType := "IP-CIDR"
 			// 判断是否为 IPv6
-			ip := net.ParseIP(entry)
-			if ip != nil && ip.To4() == nil {
+			if ip.To4() == nil {
 				entryType = "IP-CIDR6"
 			}
 			result = append(result, types.Entry{

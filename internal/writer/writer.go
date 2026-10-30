@@ -23,35 +23,40 @@ func New(outputDir string) *Writer {
 
 // Write 将条目写入指定的文件（使用 bufio.Writer 流式写入，避免内存中构建大字符串）
 func (w *Writer) Write(filename string, description string, behavior string, entries []types.Entry) error {
-	// 确保输出目录存在
-	if err := os.MkdirAll(w.outputDir, 0755); err != nil {
-		return fmt.Errorf("创建输出目录失败: %w", err)
-	}
-
-	filePath := filepath.Join(w.outputDir, filename)
-	f, err := os.Create(filePath)
-	if err != nil {
-		return fmt.Errorf("创建文件失败: %w", err)
-	}
-	defer f.Close()
-
-	writer := bufio.NewWriter(f)
-	defer writer.Flush()
-
-	// 写入头部
-	writer.WriteString("payload:\n")
-
-	// 根据 behavior 格式化并写入条目
-	for _, entry := range entries {
-		formatted := w.formatEntry(entry, behavior)
-		if formatted != "" {
-			writer.WriteString("  - ")
-			writer.WriteString(formatted)
-			writer.WriteString("\n")
+	return w.writeFile(filename, func(out *bufio.Writer) error {
+		if _, err := out.WriteString("payload:\n"); err != nil {
+			return err
 		}
-	}
+		for _, entry := range entries {
+			if formatted := w.formatEntry(entry, behavior); formatted != "" {
+				if _, err := fmt.Fprintf(out, "  - %s\n", formatted); err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
+}
 
-	return nil
+// writeFile 检查写入、刷新和关闭错误，避免成功发布截断文件。
+func (w *Writer) writeFile(filename string, write func(*bufio.Writer) error) (err error) {
+	if err := os.MkdirAll(w.outputDir, 0755); err != nil {
+		return err
+	}
+	f, err := os.Create(filepath.Join(w.outputDir, filename))
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if closeErr := f.Close(); err == nil {
+			err = closeErr
+		}
+	}()
+	out := bufio.NewWriter(f)
+	if err := write(out); err != nil {
+		return err
+	}
+	return out.Flush()
 }
 
 // formatEntry 根据 behavior 格式化单个条目
