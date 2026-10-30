@@ -1,9 +1,10 @@
-// Package loon 保存固定上游配置，仅替换远程分流及 GeoIP / ASN URL。
+// Package loon 保存固定上游配置，生成分流、数据库及 GitHub 资源镜像配置。
 package loon
 
 import (
 	_ "embed"
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -14,7 +15,21 @@ var Upstream string
 var License []byte
 
 const ConfigFilename = "Loon_Auto_Select_Config.lcf"
-const BaseURL = "https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/loon/"
+const MirrorPrefix = "https://gh-proxy.com/"
+const rawBaseURL = "https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/loon/"
+const BaseURL = MirrorPrefix + rawBaseURL
+
+var resourceURL = regexp.MustCompile(`https://[^\s,]+`)
+
+// mirrorGitHubURLs 仅改变 GitHub 资源的获取入口，已走镜像的 URL 不重复包装。
+func mirrorGitHubURLs(text string) string {
+	return resourceURL.ReplaceAllStringFunc(text, func(resource string) string {
+		if strings.HasPrefix(resource, "https://raw.githubusercontent.com/") || strings.HasPrefix(resource, "https://github.com/") {
+			return MirrorPrefix + resource
+		}
+		return resource
+	})
+}
 
 var replacements = map[string]string{
 	"https://rule.kelee.one/Loon/Telegram.lsr":                   "telegram.lsr",
@@ -56,7 +71,7 @@ func Generate() (string, error) {
 		if !ok || !exists || seen[url] {
 			return "", fmt.Errorf("无法映射分流订阅: %s", trimmed)
 		}
-		lines[i] = BaseURL + filename + line[len(url):]
+		lines[i] = rawBaseURL + filename + line[len(url):]
 		seen[url] = true
 		count++
 	}
@@ -66,5 +81,5 @@ func Generate() (string, error) {
 	if databaseCount != len(databaseReplacements) {
 		return "", fmt.Errorf("预期替换两项数据库地址，实际 %d 项", databaseCount)
 	}
-	return strings.Join(lines, ""), nil
+	return mirrorGitHubURLs(strings.Join(lines, "")), nil
 }

@@ -30,51 +30,51 @@ Clash 分流规则聚合系统，自动从多个上游源获取规则，合并�
 
 ### 在线地址（URL）
 
-> 如果无法访问域名 `raw.githubusercontent.com`，可以使用第二个地址（`cdn.jsdelivr.net`），但是内容更新会有 12 小时的延迟。以下地址填写在 Clash 配置文件里的 `rule-providers` 里的 `url` 配置项中。
+> 默认提供 GH-Proxy 镜像地址，同时保留 CDN 入口；镜像和 CDN 均可能存在缓存延迟。以下地址填写在 Clash 配置文件的 `rule-providers` → `url` 中。
 
 #### 域名类规则（behavior: domain）
 
 - **中国大陆直连域名 direct-domain.yaml**：
-  - [https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/direct-domain.yaml](https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/direct-domain.yaml)
+  - [https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/direct-domain.yaml](https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/direct-domain.yaml)
   - [https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/direct-domain.yaml](https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/direct-domain.yaml)
 - **需要代理的域名 proxy-domain.yaml**：
-  - [https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/proxy-domain.yaml](https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/proxy-domain.yaml)
+  - [https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/proxy-domain.yaml](https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/proxy-domain.yaml)
   - [https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/proxy-domain.yaml](https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/proxy-domain.yaml)
 - **广告及恶意域名 reject-domain.yaml**：
-  - [https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/reject-domain.yaml](https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/reject-domain.yaml)
+  - [https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/reject-domain.yaml](https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/reject-domain.yaml)
   - [https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/reject-domain.yaml](https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/reject-domain.yaml)
 - **私有网络专用域名 private-domain.yaml**：
-  - [https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/private-domain.yaml](https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/private-domain.yaml)
+  - [https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/private-domain.yaml](https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/private-domain.yaml)
   - [https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/private-domain.yaml](https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/private-domain.yaml)
 - **Apple 在中国大陆可直连的域名 apple-direct.yaml**：
-  - [https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/apple-direct.yaml](https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/apple-direct.yaml)
+  - [https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/apple-direct.yaml](https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/apple-direct.yaml)
   - [https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/apple-direct.yaml](https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/apple-direct.yaml)
 - **iCloud 域名列表 icloud-domain.yaml**：
-  - [https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/icloud-domain.yaml](https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/icloud-domain.yaml)
+  - [https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/icloud-domain.yaml](https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/icloud-domain.yaml)
   - [https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/icloud-domain.yaml](https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/icloud-domain.yaml)
 - **GFWList 域名列表 gfwlist-domain.yaml**：
-  - [https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/gfwlist-domain.yaml](https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/gfwlist-domain.yaml)
+  - [https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/gfwlist-domain.yaml](https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/gfwlist-domain.yaml)
   - [https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/gfwlist-domain.yaml](https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/gfwlist-domain.yaml)
 - **非中国大陆使用的顶级域名 non-china-tld.yaml**：
-  - [https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/non-china-tld.yaml](https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/non-china-tld.yaml)
+  - [https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/non-china-tld.yaml](https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/non-china-tld.yaml)
   - [https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/non-china-tld.yaml](https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/non-china-tld.yaml)
 - **需要直连的常见软件列表 common-software.yaml**：
-  - [https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/common-software.yaml](https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/common-software.yaml)
+  - [https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/common-software.yaml](https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/common-software.yaml)
   - [https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/common-software.yaml](https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/common-software.yaml)
 - **AI 服务相关域名 ai-domain.yaml**：
-  - [https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/ai-domain.yaml](https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/ai-domain.yaml)
+  - [https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/ai-domain.yaml](https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/ai-domain.yaml)
   - [https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/ai-domain.yaml](https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/ai-domain.yaml)
 
 #### IP 类规则（behavior: ipcidr）
 
 - **Telegram 使用的 IP 地址 telegram-ip.yaml**：
-  - [https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/telegram-ip.yaml](https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/telegram-ip.yaml)
+  - [https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/telegram-ip.yaml](https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/telegram-ip.yaml)
   - [https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/telegram-ip.yaml](https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/telegram-ip.yaml)
 - **局域网 IP 及保留 IP 地址 lan-reserved-ip.yaml**：
-  - [https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/lan-reserved-ip.yaml](https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/lan-reserved-ip.yaml)
+  - [https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/lan-reserved-ip.yaml](https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/lan-reserved-ip.yaml)
   - [https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/lan-reserved-ip.yaml](https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/lan-reserved-ip.yaml)
 - **中国大陆 IP 地址 china-ip.yaml**：
-  - [https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/china-ip.yaml](https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/china-ip.yaml)
+  - [https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/china-ip.yaml](https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/china-ip.yaml)
   - [https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/china-ip.yaml](https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/china-ip.yaml)
 
 #### GeoIP 文件
@@ -82,14 +82,14 @@ Clash 分流规则聚合系统，自动从多个上游源获取规则，合并�
 Loon 的 `geoip-url` 使用 `Country.mmdb`，`ipasn-url` 使用 `GeoLite2-ASN.mmdb`。历史 `Country-asn.mmdb` 的类型仍是 `GeoLite2-Country`，保留现有地址，但不能拿它替代 IP→ASN 查询库。
 
 - **Country.mmdb**：
-  - [https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/Country.mmdb](https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/Country.mmdb)
+  - [https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/Country.mmdb](https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/Country.mmdb)
   - [https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/Country.mmdb](https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/Country.mmdb)
 - **Country-asn.mmdb**：
-  - [https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/Country-asn.mmdb](https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/Country-asn.mmdb)
+  - [https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/Country-asn.mmdb](https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/Country-asn.mmdb)
   - [https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/Country-asn.mmdb](https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/Country-asn.mmdb)
 
 - **GeoLite2-ASN.mmdb（IP→ASN）**：
-  - [Raw 地址](https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/GeoLite2-ASN.mmdb)
+  - [镜像地址](https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/GeoLite2-ASN.mmdb)
   - [CDN 地址](https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/GeoLite2-ASN.mmdb)
   - 上游：[P3TERX/GeoLite.mmdb](https://github.com/P3TERX/GeoLite.mmdb)，数据归 MaxMind，遵循该上游列明的 GeoLite2 许可条款。
 
@@ -289,19 +289,23 @@ clash-rules-cn/
 配置下载地址：
 
 ```text
-https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/loon/Loon_Auto_Select_Config.lcf
+https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/loon/Loon_Auto_Select_Config.lcf
 ```
 
-先备份 Loon 现有配置，再通过「从 URL 下载」导入，并添加自己的节点订阅。配置来自可莉自动配置固定快照，构建仅替换 `[Remote Rule]` 六个 URL 和 `[General]` 的 GeoIP / ASN 两个数据库 URL，其余正文、策略及插件保持原样。上游版本与许可见 [固定快照说明](templates/loon/README.md)。配置模板不会随定时任务自动追随上游修改。
+先备份 Loon 现有配置，再通过「从 URL 下载」导入，并添加自己的节点订阅。配置来自可莉自动配置固定快照，构建仅替换 `[Remote Rule]` 六个 URL 和 `[General]` 的 GeoIP / ASN 两个数据库 URL，解析器、图标及上述分流/数据库的 GitHub 地址统一走 GH-Proxy 镜像；其余正文、策略及插件保持原样。上游版本与许可见 [固定快照说明](templates/loon/README.md)。配置模板不会随定时任务自动追随上游修改。
 
 **插件地址仍指向原服务。分流和数据库换源不代表原插件恢复下载，已有缓存的用户请勿因换源而清除插件缓存或重装 Loon。** 本仓库不分发可莉插件。
 
+镜像服务用法见 [GH-Proxy 官方文档](https://gh-proxy.com/docs/github-accelerator)。验证包含镜像与上游内容的 SHA256 对比；不等同于全国所有运营商、所有时段的可达性保证。
+
 ### 规则订阅地址
 
-所有 Loon 文件位于 `rules` 分支的 `loon/` 目录：
+所有 Loon 文件位于 `rules` 分支的 `loon/` 目录，默认使用镜像获取。配置拉取入口与内部 GitHub 资源均采用 `https://gh-proxy.com/` 前缀，包含规则、国家库、ASN 库、Sub-Store 解析器和全部策略图标。镜像可能存在缓存延迟，更新后若仍拿到旧文件，可在导入 URL 后附加 `?v=提交短哈希`。
+
+默认镜像订阅地址（CDN 作为另一种获取入口）：
 
 ```text
-https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/loon/<文件名>
+https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/loon/<文件名>
 https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/loon/<文件名>
 ```
 
@@ -320,7 +324,7 @@ https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/loon/<文件名>
 
 ```ini
 [Remote Rule]
-https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/loon/ai-domain.lsr, policy=美国手动策略, tag=AI, enabled=true
+https://gh-proxy.com/https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/loon/ai-domain.lsr, policy=美国手动策略, tag=AI, enabled=true
 ```
 
 ### 覆盖范围与兼容说明
