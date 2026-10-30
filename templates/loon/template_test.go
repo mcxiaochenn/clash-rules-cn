@@ -3,12 +3,11 @@ package loon
 import (
 	"crypto/sha256"
 	"fmt"
-	"net/url"
 	"strings"
 	"testing"
 )
 
-func TestOnlyResourceURLsChange(t *testing.T) {
+func TestOnlySixRulesAndTwoDatabaseURLsChange(t *testing.T) {
 	if got := fmt.Sprintf("%x", sha256.Sum256([]byte(Upstream))); got != "3a07e4dc097243a437679dffd2b0fae6e6382038688624cfddb284c8d1580629" {
 		t.Fatalf("上游快照变动: %s", got)
 	}
@@ -16,9 +15,7 @@ func TestOnlyResourceURLsChange(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// 去除镜像前缀后，必须仍只存在既定六项规则和两项数据库地址变化。
-	unmirrored := strings.ReplaceAll(generated, MirrorPrefix, "")
-	before, after := strings.SplitAfter(Upstream, "\n"), strings.SplitAfter(unmirrored, "\n")
+	before, after := strings.SplitAfter(Upstream, "\n"), strings.SplitAfter(generated, "\n")
 	if len(before) != len(after) {
 		t.Fatal("行数变化")
 	}
@@ -48,7 +45,7 @@ func TestOnlyResourceURLsChange(t *testing.T) {
 		}
 		oldURL, oldOptions, _ := strings.Cut(line, ",")
 		newURL, newOptions, _ := strings.Cut(after[i], ",")
-		if oldOptions != newOptions || newURL != rawBaseURL+replacements[oldURL] {
+		if oldOptions != newOptions || newURL != BaseURL+replacements[oldURL] {
 			t.Fatalf("不允许的修改: %s", after[i])
 		}
 		count++
@@ -86,37 +83,5 @@ func TestOnlyResourceURLsChange(t *testing.T) {
 		if strings.HasPrefix(line, "FINAL,") && !groups[strings.TrimSpace(strings.TrimPrefix(line, "FINAL,"))] {
 			t.Fatal("无效 FINAL 策略")
 		}
-	}
-}
-
-func TestEveryGitHubResourceUsesMirror(t *testing.T) {
-	generated, err := Generate()
-	if err != nil {
-		t.Fatal(err)
-	}
-	unique := make(map[string]bool)
-	for _, resource := range resourceURL.FindAllString(generated, -1) {
-		parsed, err := url.Parse(resource)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if parsed.Hostname() == "github.com" || parsed.Hostname() == "raw.githubusercontent.com" {
-			t.Fatalf("残留 GitHub 直连资源: %s", resource)
-		}
-		if strings.HasPrefix(resource, MirrorPrefix) {
-			original := strings.TrimPrefix(resource, MirrorPrefix)
-			upstream, err := url.Parse(original)
-			if err != nil || (upstream.Hostname() != "github.com" && upstream.Hostname() != "raw.githubusercontent.com") {
-				t.Fatalf("错误镜像地址: %s", resource)
-			}
-			unique[resource] = true
-		}
-	}
-	// 六项规则、两个数据库、解析器和九个不同图标。
-	if len(unique) != 18 {
-		t.Fatalf("镜像资源数量不符: %d", len(unique))
-	}
-	if mirrorGitHubURLs(generated) != generated {
-		t.Fatal("重复包装镜像 URL")
 	}
 }
