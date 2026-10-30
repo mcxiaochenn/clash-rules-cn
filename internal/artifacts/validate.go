@@ -71,7 +71,7 @@ func Validate(cfg *config.Config, rulesDir, geoDir string) error {
 		return err
 	}
 	if string(got) != want {
-		return fmt.Errorf("配置正文不符合六项分流和两项数据库 URL 替换约定")
+		return fmt.Errorf("配置正文不符合分流、数据库及 CDN URL 替换约定")
 	}
 	section, count := "", 0
 	for _, line := range strings.Split(want, "\n") {

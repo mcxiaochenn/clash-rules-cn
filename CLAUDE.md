@@ -110,6 +110,6 @@ sources.yaml config
 - 13 个既有 YAML 原样兼容；新增 18 个原生规则位于 `rules/loon/`，发布分支路径为 `loon/`。
 - `sources.yaml` 的 `loon_output` 仅用于五个 Loon 组合输出，复用 OutputRule，使用 classical 行为。
 - Loon 写出前恢复 applications 进程规则并清理域名行内注释，保留关键词和 IPv6 类型；Clash 用兼容路径保持旧输出字节。
-- 固定可莉模板在 `templates/loon/`，仅替换六项分流及两项数据库 URL，不能修改其他配置或自动追随上游；独立 CC BY-NC-SA 4.0 许可。
+- 固定可莉模板在 `templates/loon/`，替换六项分流及两项数据库 URL，并将配置中的 GitHub 资源统一转换为 cdn.jsdelivr.net；不能修改其他配置或自动追随上游；独立 CC BY-NC-SA 4.0 许可。
 - `go run ./cmd/check` 校验发布产物；CI 暂存后发布根目录 YAML/MMDB 和 `loon/`，Release 同步附带新文件。
 - 测试通过不等于真机验收；首次发布后需核验 Raw 地址和 Release 内容。

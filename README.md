@@ -289,19 +289,18 @@ clash-rules-cn/
 配置下载地址：
 
 ```text
-https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/loon/Loon_Auto_Select_Config.lcf
+https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/loon/Loon_Auto_Select_Config.lcf
 ```
 
-先备份 Loon 现有配置，再通过「从 URL 下载」导入，并添加自己的节点订阅。配置来自可莉自动配置固定快照，构建仅替换 `[Remote Rule]` 六个 URL 和 `[General]` 的 GeoIP / ASN 两个数据库 URL，其余正文、策略及插件保持原样。上游版本与许可见 [固定快照说明](templates/loon/README.md)。配置模板不会随定时任务自动追随上游修改。
+先备份 Loon 现有配置，再通过「从 URL 下载」导入，并添加自己的节点订阅。配置来自可莉自动配置固定快照，构建仅替换 `[Remote Rule]` 六个 URL 和 `[General]` 的 GeoIP / ASN 两个数据库 URL，配置中的 GitHub 资源（含解析器和图标）统一使用 `cdn.jsdelivr.net`，其余正文、策略及插件保持原样。上游版本与许可见 [固定快照说明](templates/loon/README.md)。配置模板不会随定时任务自动追随上游修改。
 
 **插件地址仍指向原服务。分流和数据库换源不代表原插件恢复下载，已有缓存的用户请勿因换源而清除插件缓存或重装 Loon。** 本仓库不分发可莉插件。
 
 ### 规则订阅地址
 
-所有 Loon 文件位于 `rules` 分支的 `loon/` 目录：
+所有 Loon 文件位于 `rules` 分支的 `loon/` 目录，配置拉取入口与内部 GitHub 依赖均使用 jsDelivr：
 
 ```text
-https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/loon/<文件名>
 https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/loon/<文件名>
 ```
 
@@ -320,7 +319,7 @@ https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/loon/<文件名>
 
 ```ini
 [Remote Rule]
-https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/loon/ai-domain.lsr, policy=美国手动策略, tag=AI, enabled=true
+https://cdn.jsdelivr.net/gh/mcxiaochenn/clash-rules-cn@rules/loon/ai-domain.lsr, policy=美国手动策略, tag=AI, enabled=true
 ```
 
 ### 覆盖范围与兼容说明
@@ -333,6 +332,8 @@ https://raw.githubusercontent.com/mcxiaochenn/clash-rules-cn/rules/loon/ai-domai
 - Surge 域名规则的 `extended-matching` 在 Loon 中没有对应参数；转换时显式记录日志并保留基本域名匹配，不承诺 CNAME 扩展匹配等价。其他未知类型或参数会阻止发布。
 - 旧 GFWList 解析生成的 `http:` / `https:` 伪域名在 Loon 路径显式记录并排除；为满足字节兼容约定，Clash 历史条目仍保留，产物校验只对这两个已知旧条目作兼容放行。
 - 本次不自动启用 `reject-domain.lsr`，完整配置仍仅包含原来的六项分流订阅。
+
+CDN 可能有缓存延迟，发布后会验证配置及引用资源能够下载。
 
 ### 构建、验证和发布
 
