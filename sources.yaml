@@ -229,6 +229,20 @@ output:
     description: "中国大陆直连域名"
     behavior: "domain"
     sources: ["dnsmasq_china", "v2fly_cn", "loyalsoldier_direct", "ios_rule_direct"]
+    # 上游误分类纠错：mtalk 是 FCM/GCM 推送通道，实测国内直连 TLS 握手即被断开，
+    # 归「直连」是错的，应走代理（proxy_domain 已含这些条目）。
+    # 来源：blackmatrix7 Clash/Direct/Direct.list。
+    # 逐条写全而非用通配，是为了不引入第二种匹配语义。
+    exclude:
+      - "mtalk.google.com"
+      - "alt1-mtalk.google.com"
+      - "alt2-mtalk.google.com"
+      - "alt3-mtalk.google.com"
+      - "alt4-mtalk.google.com"
+      - "alt5-mtalk.google.com"
+      - "alt6-mtalk.google.com"
+      - "alt7-mtalk.google.com"
+      - "alt8-mtalk.google.com"
 
   proxy_domain:
     filename: "proxy-domain.yaml"
@@ -241,6 +255,18 @@ output:
     description: "广告及恶意域名"
     behavior: "domain"
     sources: ["anti_ad", "loyalsoldier_reject", "ios_rule_reject"]
+    # 上游误分类纠错：这四条都不是广告/恶意域名，被 reject 会直接打断正常功能。
+    #   mtalk.google.com —— FCM/GCM 推送通道，REJECT 会打断所有 Google 系 app 的推送
+    #   gvt1-cn.com      —— Google 国内 CDN 镜像（TLS 证书 subject=*.google.cn、
+    #                        issuer=Google Trust Services），直连可达，应归 direct
+    #   ggpht.cn / gggpht.com —— Google 图片 CDN 及其国内镜像
+    # 来源：blackmatrix7 Clash/Advertising/Advertising.list（4 条全中）、anti-AD（ggpht.cn）。
+    # loyalsoldier_reject 干净，20 万条 0 命中。
+    exclude:
+      - "mtalk.google.com"
+      - "gvt1-cn.com"
+      - "ggpht.cn"
+      - "gggpht.com"
 
   private_domain:
     filename: "private-domain.yaml"
@@ -283,6 +309,12 @@ output:
     description: "AI 服务相关域名"
     behavior: "domain"
     sources: ["ai_dler", "ai_sukkaw", "ai_connershua", "ai_openai", "ai_gemini", "ai_claude", "ai_copilot", "ai_chatgpt"]
+    # 上游误分类纠错：这几个不是 AI 服务，是上游收集 AI 规则时把 Google 全家桶扫进来了。
+    # 剔除后自动落回 proxy_domain（已含 .play.google.com、.googleusercontent.com）。
+    exclude:
+      - "play.google.com"
+      - "lh3.googleusercontent.com"
+      - "lh5.googleusercontent.com"
 
   # IP 类规则
   telegram_ip:

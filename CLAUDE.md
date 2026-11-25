@@ -59,7 +59,7 @@ sources.yaml config
 | `config` | Load and validate `sources.yaml` |
 | `fetcher` | Concurrent HTTP downloads with retry logic |
 | `parser` | 8 parsers (see below) |
-| `merger` | Aggregate entries by output rule, filter by behavior (`domain`/`ipcidr`/`classical`), deduplicate, sort |
+| `merger` | Aggregate entries by output rule, filter by behavior (`domain`/`ipcidr`/`classical`), deduplicate, sort, apply `exclude` 上游纠错 |
 | `writer` | Write YAML rule-provider files with `bufio.Writer` streaming |
 | `types` | Shared `Entry` struct |
 
@@ -86,8 +86,14 @@ sources.yaml config
 
 `sources.yaml` defines three sections:
 - **`upstream`**: source name → URL, parser type, optional inline entries
-- **`output`**: rule name → filename, description, behavior type, list of source names
+- **`output`**: rule name → filename, description, behavior type, list of source names, optional `exclude` 上游纠错清单
 - **`geoip`**: 国家库来自 `Loyalsoldier/geoip`，IP→ASN 库来自 `P3TERX/GeoLite.mmdb`
+
+### exclude 上游纠错
+
+`output.<rule>.exclude` 剔除上游误分类的条目（只做减法，无优先级/覆盖语义），匹配语义同 `DOMAIN-SUFFIX`：条目与 payload 相等，或 payload 以 `.条目` 结尾；写 `.example.com` / `example.com` 均可。实现见 `internal/merger.ApplyExclude`，在 `cmd/builder/main.go` 的三处合并调用点（Clash YAML、逐规则 Loon、Loon 组合输出）统一应用。
+
+注意：`alt1-mtalk.google.com` 不是 `mtalk.google.com` 的子域（差 `alt1-` 前缀），要剔除必须显式列出。只匹配域名类条目（`DOMAIN`/`DOMAIN-SUFFIX`/`DOMAIN-KEYWORD`），`IP-CIDR`、`PROCESS-NAME` 等原样保留。当前生效清单见 `sources.yaml` 各输出规则下的 `exclude` 段，每条都注明误判原因与来源上游。
 
 ## Output
 

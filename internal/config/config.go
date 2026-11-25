@@ -30,6 +30,10 @@ type OutputRule struct {
 	Description string   `yaml:"description"`
 	Behavior    string   `yaml:"behavior"` // domain, ipcidr, classical
 	Sources     []string `yaml:"sources"`
+	// Exclude 剔除上游误分类的条目（纠错黑名单，只做减法，不改分类逻辑）。
+	// 匹配语义与 DOMAIN-SUFFIX 一致：条目与 payload 相等，或 payload 以 ".条目" 结尾。
+	// 写 ".example.com" 或 "example.com" 均可，实现时统一去掉前导点。
+	Exclude []string `yaml:"exclude,omitempty"`
 }
 
 // GeoIPConfig 表示 GeoIP 配置
@@ -129,6 +133,16 @@ func (c *Config) validateOutput(name string, rule OutputRule) error {
 	for _, sourceName := range rule.Sources {
 		if _, exists := c.Upstream[sourceName]; !exists {
 			return fmt.Errorf("输出规则 %s 引用了不存在的上游源: %s", name, sourceName)
+		}
+	}
+	// 验证排除清单：条目不能为空，也不能含逗号（避免污染 classical 输出的匹配值）
+	for _, pattern := range rule.Exclude {
+		p := strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(pattern), "."))
+		if p == "" {
+			return fmt.Errorf("输出规则 %s 的 exclude 存在空条目", name)
+		}
+		if strings.Contains(p, ",") {
+			return fmt.Errorf("输出规则 %s 的 exclude 条目 %q 不能包含逗号", name, pattern)
 		}
 	}
 	return nil

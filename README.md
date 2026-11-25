@@ -26,6 +26,35 @@ Clash 分流规则聚合系统，自动从多个上游源获取规则，合并�
 | [ConnersHua/RuleGo](https://github.com/ConnersHua/RuleGo) | ConnersHua | AI 服务域名 |
 | [blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script) (AI) | blackmatrix7 | OpenAI/Gemini/Claude/Copilot 域名 |
 
+### 上游纠错（exclude）
+
+上游列表体量大、分类口径不一，难免把个别域名归错类。直接透传会出问题——例如把 FCM 推送通道当成广告域名 REJECT，会打断所有 Google 系 app 的推送。
+
+`sources.yaml` 的每个输出规则都支持可选的 `exclude` 字段，用于剔除上游误分类的条目：
+
+```yaml
+output:
+  reject_domain:
+    filename: "reject-domain.yaml"
+    description: "广告及恶意域名"
+    behavior: "domain"
+    sources: ["anti_ad", "loyalsoldier_reject", "ios_rule_reject"]
+    exclude:
+      - "mtalk.google.com"   # FCM 推送通道，不是广告
+      - "gvt1-cn.com"        # Google 国内 CDN 镜像，不是广告
+```
+
+匹配语义与 `DOMAIN-SUFFIX` 一致：**条目与 payload 相等，或 payload 以 `.条目` 结尾**。写 `mtalk.google.com` 或 `.mtalk.google.com` 均可。
+
+几点要注意：
+
+- `exclude` **只做减法**，不改分类逻辑、没有优先级/覆盖语义。剔除后该域名会落回其它规则集的归类
+- `alt1-mtalk.google.com` 这类**不是** `mtalk.google.com` 的子域（差个 `alt1-` 前缀），要剔除必须显式列出
+- 只对域名类条目（`DOMAIN` / `DOMAIN-SUFFIX` / `DOMAIN-KEYWORD`）做匹配，`IP-CIDR`、`PROCESS-NAME` 等类型原样保留
+- classical 源的 payload 若带参数（如 `no-resolve`），只比对逗号前的匹配值
+
+当前生效的纠错清单见 [`sources.yaml`](sources.yaml) 各输出规则下的 `exclude` 段，每条都注明了误判原因和来源上游。
+
 ## 规则文件地址及使用方式
 
 ### 在线地址（URL）
@@ -267,7 +296,7 @@ clash-rules-cn/
 │   ├── config/                # 配置加载
 │   ├── fetcher/               # HTTP 并发拉取（3 次重试）
 │   ├── parser/                # 8 种解析器（cidr/dnsmasq/domain-list/gfwlist/v2fly-dlc/classical/loyalsoldier/static）
-│   ├── merger/                # 合并去重排序
+│   ├── merger/                # 合并去重排序 + exclude 上游纠错
 │   ├── writer/                # YAML 流式输出
 │   └── types/                 # 共享类型
 ├── sources.yaml               # 上游源 + 输出规则配置

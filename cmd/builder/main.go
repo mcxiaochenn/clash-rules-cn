@@ -121,8 +121,8 @@ func main() {
 			}
 		}
 
-		// 合并去重排序
-		merged := merger.Merge(legacyEntries, rule.Behavior)
+		// 合并去重排序，再剔除上游误分类条目
+		merged := merger.ApplyExclude(merger.Merge(legacyEntries, rule.Behavior), rule.Exclude)
 
 		// 写入文件
 		if err := w.Write(rule.Filename, rule.Description, rule.Behavior, merged); err != nil {
@@ -130,7 +130,7 @@ func main() {
 		}
 
 		loonFilename := strings.TrimSuffix(rule.Filename, filepath.Ext(rule.Filename)) + ".lsr"
-		if err := lw.WriteLoon(loonFilename, merger.MergeLoon(allEntries, rule.Behavior)); err != nil {
+		if err := lw.WriteLoon(loonFilename, merger.ApplyExclude(merger.MergeLoon(allEntries, rule.Behavior), rule.Exclude)); err != nil {
 			log.Fatalf("写入 %s 失败: %v", loonFilename, err)
 		}
 
@@ -146,7 +146,7 @@ func main() {
 			}
 			entries = append(entries, data...)
 		}
-		if err := lw.WriteLoon(rule.Filename, merger.MergeLoon(entries, rule.Behavior)); err != nil {
+		if err := lw.WriteLoon(rule.Filename, merger.ApplyExclude(merger.MergeLoon(entries, rule.Behavior), rule.Exclude)); err != nil {
 			log.Fatalf("写入 %s 失败: %v", rule.Filename, err)
 		}
 	}

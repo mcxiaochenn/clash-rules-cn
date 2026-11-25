@@ -108,3 +108,66 @@ func MergeLoon(entries []types.Entry, behavior string) []types.Entry {
 	filtered := filterByBehavior(normalized, behavior)
 	return Merge(append(filtered, processes...), "classical")
 }
+
+// ApplyExclude 剔除上游误分类的条目。
+// exclude 采用 DOMAIN-SUFFIX 语义：条目与 payload 相等，或 payload 以 ".条目" 结尾。
+// 条目允许写成 ".example.com" 或 "example.com"，实现时统一去掉前导点。
+// 只做减法，不改分类逻辑；exclude 为空时原样返回，不产生额外分配。
+func ApplyExclude(entries []types.Entry, exclude []string) []types.Entry {
+	patterns := normalizePatterns(exclude)
+	if len(patterns) == 0 {
+		return entries
+	}
+
+	result := make([]types.Entry, 0, len(entries))
+	removed := 0
+	for _, entry := range entries {
+		if matchExclude(entry, patterns) {
+			removed++
+			continue
+		}
+		result = append(result, entry)
+	}
+	if removed > 0 {
+		log.Printf("exclude: 剔除 %d 条上游误分类条目（清单 %d 项）", removed, len(patterns))
+	}
+	return result
+}
+
+// normalizePatterns 归一化排除清单：去空白、去前导点、转小写，丢弃空条目
+func normalizePatterns(exclude []string) []string {
+	patterns := make([]string, 0, len(exclude))
+	for _, raw := range exclude {
+		p := strings.ToLower(strings.TrimSpace(raw))
+		p = strings.TrimPrefix(p, ".")
+		if p != "" {
+			patterns = append(patterns, p)
+		}
+	}
+	return patterns
+}
+
+// matchExclude 判断单条条目是否命中排除清单。
+// 只对域名类条目做匹配，IP-CIDR / PROCESS-NAME 等类型保留原样，
+// 避免把 CIDR 或进程名误当域名比对。
+func matchExclude(entry types.Entry, patterns []string) bool {
+	switch entry.Type {
+	case "DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD":
+	default:
+		return false
+	}
+
+	payload := strings.ToLower(strings.TrimSpace(entry.Payload))
+	// classical 源可能在 payload 里带参数（如 no-resolve），只取逗号前的匹配值
+	if i := strings.IndexByte(payload, ','); i >= 0 {
+		payload = payload[:i]
+	}
+	payload = strings.TrimPrefix(payload, ".")
+
+	for _, p := range patterns {
+		if payload == p || strings.HasSuffix(payload, "."+p) {
+			return true
+		}
+	}
+	return false
+}
